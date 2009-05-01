@@ -34,19 +34,19 @@ module SNMP4EM
     
     def handle_response(response) #:nodoc:
       oids_to_delete = []
-      
+
       if (response.error_status == :noError)
         response.varbind_list.each_index do |i|
           walk_oid = @pending_oids[i]
           response_vb = response.varbind_list[i]
           
           # Initialize the responses array if necessary
-          @responses[walk_oid] ||= Array.new
+          @responses[walk_oid.to_s] ||= Array.new
           
           # If the incoming response-oid begins with the walk-oid, then append the pairing
           # to the @response array. Otherwise, add it to the list of oids ready to delete
           if (response_vb.name[0,walk_oid.length] == walk_oid)
-            @responses[walk_oid] << [response_vb.name, response_vb.value]
+            @responses[walk_oid.to_s] << [response_vb.name, response_vb.value]
           else
             # If we were to delete thid oid from @pending_oids now, it would mess up the
             # @pending_oids[i] call above.
@@ -60,7 +60,7 @@ module SNMP4EM
         error_oid = @pending_oids[response.error_index - 1]
         oids_to_delete << error_oid
         
-        @responses[error_oid] = SNMP::ResponseError.new(response.error_status)
+        @responses[error_oid.to_s] = SNMP::ResponseError.new(response.error_status)
         @error_retries -= 1
       end
       
@@ -74,9 +74,7 @@ module SNMP4EM
         # Send the @responses back to the requester, we're done!
         succeed @responses
       else
-        debug "error-retry" do
-          send
-        end
+        send
       end
     end
 
@@ -91,14 +89,13 @@ module SNMP4EM
       @pending_oids.each do |oid|
         # If there's already a response for this walk-oid, then use the last returned oid, otherwise
         # start with the walk-oid.
-        if @responses.has_key?(oid)
-          oids << @responses[oid].last.first
+        if @responses.has_key?(oid.to_s)
+          oids << @responses[oid.to_s].last.first
         else
           oids << oid
         end
       end
 
-      debug "Sending walk request for #{oids.collect{|o| o.to_s}.join(', ')}"
       vb_list = SNMP::VarBindList.new(oids)
       request = SNMP::GetNextRequest.new(@snmp_id, vb_list)
       message = SNMP::Message.new(:SNMPv1, @sender.community_ro, request)

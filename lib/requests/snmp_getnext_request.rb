@@ -61,10 +61,7 @@ module SNMP4EM
         succeed @responses
       else
         @error_retries -= 1
-        
-        debug "error-retry" do
-          send
-        end
+        send
       end
     end
 
@@ -75,7 +72,6 @@ module SNMP4EM
 
       @snmp_id = generate_snmp_id
 
-      debug "Sending get-next request for #{@pending_oids.collect{|o| o.to_s}.join(', ')}"
       vb_list = SNMP::VarBindList.new(@pending_oids)
       request = SNMP::GetNextRequest.new(@snmp_id, vb_list)
       message = SNMP::Message.new(:SNMPv1, @sender.community_ro, request)

@@ -71,9 +71,7 @@ module SNMP4EM
       else
         @error_retries -= 1
         
-        debug "error-retry" do
-          send
-        end
+        send
       end
     end
 
@@ -84,7 +82,6 @@ module SNMP4EM
       
       @snmp_id = generate_snmp_id
 
-      debug "Sending set request for #{@pending_varbinds.collect{|vb| vb.name.to_s + '=' + vb.value.to_s}.join(', ')}"
       vb_list = SNMP::VarBindList.new(@pending_varbinds)
       request = SNMP::SetRequest.new(@snmp_id, vb_list)
       message = SNMP::Message.new(:SNMPv1, @sender.community_rw, request)

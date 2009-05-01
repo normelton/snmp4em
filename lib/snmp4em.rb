@@ -48,7 +48,6 @@ module SNMP4EM
     end
     
     def send(message) #:nodoc:
-      debug "Sending message #{message.pdu.request_id}"
       self.class.socket.send_datagram message.encode, @host, @port
     end
 
@@ -60,11 +59,9 @@ module SNMP4EM
     # *  _return_raw_ - Return objects and errors as their raw SNMP types, such as SNMP::Integer instead of native Ruby integers, SNMP::OctetString instead of native Ruby strings, etc. (default: false)
 
     def get(oids, args = {})
-      debug "send-get" do
-        request = SnmpGetRequest.new(self, oids, args)
-        self.class.pending_requests << request
-        return request
-      end
+      request = SnmpGetRequest.new(self, oids, args)
+      self.class.pending_requests << request
+      return request
     end
 
     # Sends an SNMP-GETNEXT request to the remote agent for all OIDs specified in the _oids_ array. Returns a SnmpGetRequest object,
@@ -76,11 +73,9 @@ module SNMP4EM
     # *  _return_raw_ - Return objects and errors as their raw SNMP types, such as SNMP::Integer instead of native Ruby integers, SNMP::OctetString instead of native Ruby strings, etc. (default: false)
 
     def getnext(oids, args = {})
-      debug "send-getnext" do
-        request = SnmpGetNextRequest.new(self, oids, args)
-        self.class.pending_requests << request
-        return request
-      end
+      request = SnmpGetNextRequest.new(self, oids, args)
+      self.class.pending_requests << request
+      return request
     end
 
     # Sends an SNMP-SET request to the remote agent for all OIDs specified in the _oids_ hash. The hash must map OID values to requested
@@ -93,11 +88,9 @@ module SNMP4EM
     # *  _return_raw_ - Return error objects as SNMP::ResponseError instead of a symbol
 
     def set(oids, args = {})
-      debug "send-set" do
-        request = SnmpSetRequest.new(self, oids, args)
-        self.class.pending_requests << request
-        return request
-      end
+      request = SnmpSetRequest.new(self, oids, args)
+      self.class.pending_requests << request
+      return request
     end
 
     # Sends a series of SNMP-GETNEXT requests to simulate an SNMP "walk" operation. Given an OID prefix, the library will keep requesting the
@@ -112,11 +105,9 @@ module SNMP4EM
     # *  _max_results_ - Maximum number of results to be returned for any single OID prefix (default: nil = unlimited)
 
     def walk(oids, args = {})
-      debug "send-walk" do
-        request = SnmpWalkRequest.new(self, oids, args)
-        self.class.pending_requests << request
-        return request
-      end
+      request = SnmpWalkRequest.new(self, oids, args)
+      self.class.pending_requests << request
+      return request
     end
   end
 end
