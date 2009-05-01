@@ -4,6 +4,7 @@
 
 This library extends the Ruby-SNMP[http://snmplib.rubyforge.org] to use the asynchronous EventMachine[http://rubyeventmachine.com] library for added performance and scalability. This allows code to scale monitoring applications to access a very high number of devices without the need for complex asynchronous I/O handling.
 
+
 == Features
 
 The initial version 0.1.0 of this software supports:
@@ -20,11 +21,13 @@ Future revisions of this library may support:
 
 There are no plans to support SNMP v3.
 
+
 == Acknowledgements
 
 * The SNMP packet processing is handled by the Ruby-SNMP[http://snmplib.rubyforge.org] library, by David Halliday
 * EventMachine[http://rubyeventmachine.com], by Francis Cianfrocca and Aman Gupta
 * All the helpful folks on the Freenode #eventmachine channel
+
 
 == Examples
 
@@ -116,8 +119,15 @@ A simple SNMP-WALK:
     end
   end
 
+
 == Change Log
 
 Version 0.1.0:
 
 * Initial deployment, ability to run get/getnext/set/walk requests in parallel
+
+
+== Developer Contact Information
+
+Norman Elton
+normelton@gmail.com
