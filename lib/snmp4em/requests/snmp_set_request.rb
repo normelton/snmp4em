@@ -1,5 +1,3 @@
-require "snmp_request.rb"
-
 module SNMP4EM
 
   # Returned from SNMP4EM::SNMPv1.set(). This implements EM::Deferrable, so you can hang a callback()

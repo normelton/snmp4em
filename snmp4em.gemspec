@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{snmp4em}
-  s.version = "0.1.1"
+  s.version = "0.1.2"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.2") if s.respond_to? :required_rubygems_version=
   s.authors = ["Norman Elton"]
@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.description = %q{A high-performance SNMP engine built on EventMachine and Ruby-SNMP}
   s.email = %q{normelton@gmail.com}
   s.extra_rdoc_files = ["README"]
-  s.files = ["lib/common.rb", "lib/handler.rb", "lib/requests/snmp_get_request.rb", "lib/requests/snmp_getnext_request.rb", "lib/requests/snmp_set_request.rb", "lib/requests/snmp_walk_request.rb", "lib/snmp4em.rb", "lib/snmp_request.rb", "Rakefile", "README", "snmp4em.gemspec", "Manifest"]
+  s.files = ["lib/snmp4em/common.rb", "lib/snmp4em/handler.rb", "lib/snmp4em/requests/snmp_get_request.rb", "lib/snmp4em/requests/snmp_getnext_request.rb", "lib/snmp4em/requests/snmp_set_request.rb", "lib/snmp4em/requests/snmp_walk_request.rb", "lib/snmp4em/snmp_request.rb", "lib/snmp4em/snmp_v1.rb", "lib/snmp4em.rb", "Manifest", "Rakefile", "README", "snmp4em.gemspec"]
   s.has_rdoc = true
   s.homepage = %q{http://github.com/normelton/snmp4em}
   s.rdoc_options = ["--line-numbers", "--inline-source", "--title", "Snmp4em", "--main", "README"]
