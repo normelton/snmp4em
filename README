@@ -9,13 +9,12 @@ This library extends the Ruby-SNMP[http://snmplib.rubyforge.org] to use the asyn
 
 The initial version 0.1.0 of this software supports:
 
-* SNMP v1 only
-* SNMP Get, GetNext, Set, and Walk requests.
+* SNMP v1 and v2 only
+* SNMP Get, GetNext, GetBulk (v2 only), Set, and Walk requests.
 * Ability to query/set/walk multiple OIDs in parallel.
 
 Future revisions of this library may support:
 
-* SNMP v2c operations (this should be easy)
 * Ability to act as an SNMP agent, responding to external queries.
 * Ability to send/receive SNMP traps
 
@@ -119,6 +118,27 @@ A simple SNMP-WALK:
     end
   end
 
+A simple SNMP-GET-BULK:
+
+  EM::run do
+    snmp = SNMP4EM::SNMPv2.new(:host => "192.168.1.1")
+
+    request = snmp.getbulk([OID_SYSTEM])
+
+    request.callback do |response|
+      if (response[OID_SYSTEM].is_a? Array)
+        response[OID_SYSTEM].each do |vb|
+          puts "#{vb[0]} = #{vb[1]}"
+        end
+      else
+        puts "Got error: #{response[OID_SYSTEM]}"
+      end
+    end
+
+    request.errback do |error|
+      puts "GET got error #{error}"
+    end
+  end
 
 == Change Log
 
@@ -126,6 +146,9 @@ Version 0.1.0:
 
 * Initial deployment, ability to run get/getnext/set/walk requests in parallel
 
+Version 0.2.0:
+
+* Added support for SNMPv2, including GET-BULK operations
 
 == Developer Contact Information
 

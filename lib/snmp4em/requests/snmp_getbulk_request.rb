@@ -42,7 +42,6 @@ module SNMP4EM
         end
 
         (@nonrepeaters ... response.vb_list.size).each do |i|
-          # puts "Response #{i} -> #{(i - @nonrepeaters) % @pending_oids.size}"
           request_oid = @pending_oids[(i - @nonrepeaters) % @pending_oids.size]
           response_vb = response.vb_list[i]
           

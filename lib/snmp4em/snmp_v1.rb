@@ -1,22 +1,8 @@
 # The SNMP4EM library 
 
 module SNMP4EM
-  class SNMPv1
-    @pending_requests = []
-    @socket = nil
-    
-    class << self
-      attr_reader :pending_requests
-      attr_reader :socket
-      
-      def init_socket #:nodoc:
-        if @socket.nil?
-          @socket = EM::open_datagram_socket("0.0.0.0", 0, Handler)
-        end
-      end
-    end
-    
-    attr_reader :host, :port, :community_ro, :community_rw, :timeout, :retries
+  class SNMPv1 < SnmpConnection
+    attr_reader :community_ro, :community_rw
     
     # Creates a new object to communicate with SNMPv1 agents. Optionally pass in the following parameters:
     # *  _host_ - IP/hostname of remote agent (default: 127.0.0.1)
@@ -28,30 +14,22 @@ module SNMP4EM
     # *  _retries_ - Number of retries before failing (default: 3)
     
     def initialize(args = {})
-      @host         = args[:host]         || "127.0.0.1"
-      @port         = args[:port]         || 161
+      super(args)
+      
       @community_ro = args[:community_ro] || args[:community] || "public"
       @community_rw = args[:community_rw] || args[:community] || "public"
-      @timeout      = args[:timeout]      || 1
-      @retries      = args[:retries]      || 3
-      
-      self.class.init_socket
     end
     
-    def send(message) #:nodoc:
-      self.class.socket.send_datagram message.encode, @host, @port
-    end
-
     # Sends an SNMP-GET request to the remote agent for all OIDs specified in the _oids_ array. Returns a SnmpGetRequest object,
     # which implements EM::Deferrable. From there, implement a callback/errback to fetch the result. On success, the result will be
     # a hash, mapping requested OID values to results.
     # 
     # Optional arguments can be passed into _args_, including:
     # *  _return_raw_ - Return objects and errors as their raw SNMP types, such as SNMP::Integer instead of native Ruby integers, SNMP::OctetString instead of native Ruby strings, etc. (default: false)
-
+ 
     def get(oids, args = {})
-      request = SnmpGetRequest.new(self, oids, args)
-      self.class.pending_requests << request
+      request = SnmpGetRequest.new(self, oids, args.merge(:version => :SNMPv1))
+      SnmpConnection.pending_requests << request
       return request
     end
 
@@ -64,8 +42,8 @@ module SNMP4EM
     # *  _return_raw_ - Return objects and errors as their raw SNMP types, such as SNMP::Integer instead of native Ruby integers, SNMP::OctetString instead of native Ruby strings, etc. (default: false)
 
     def getnext(oids, args = {})
-      request = SnmpGetNextRequest.new(self, oids, args)
-      self.class.pending_requests << request
+      request = SnmpGetNextRequest.new(self, oids, args.merge(:version => :SNMPv1))
+      SnmpConnection.pending_requests << request
       return request
     end
 
@@ -79,8 +57,8 @@ module SNMP4EM
     # *  _return_raw_ - Return error objects as SNMP::ResponseError instead of a symbol
 
     def set(oids, args = {})
-      request = SnmpSetRequest.new(self, oids, args)
-      self.class.pending_requests << request
+      request = SnmpSetRequest.new(self, oids, args.merge(:version => :SNMPv1))
+      SnmpConnection.pending_requests << request
       return request
     end
 
@@ -96,8 +74,8 @@ module SNMP4EM
     # *  _max_results_ - Maximum number of results to be returned for any single OID prefix (default: nil = unlimited)
 
     def walk(oids, args = {})
-      request = SnmpWalkRequest.new(self, oids, args)
-      self.class.pending_requests << request
+      request = SnmpWalkRequest.new(self, oids, args.merge(:version => :SNMPv1))
+      SnmpConnection.pending_requests << request
       return request
     end
   end
