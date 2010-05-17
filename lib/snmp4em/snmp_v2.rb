@@ -92,8 +92,8 @@ module SNMP4EM
     
     # Optional arguments can be passed into _args_, including:
     # *  _return_raw_ - Return objects and errors as their raw SNMP types, such as SNMP::Integer instead of native Ruby integers, SNMP::OctetString instead of native Ruby strings, etc. (default: false)
-    # *  _nonrepeaters_ - Number of OIDs passed to which exactly one result will be returned
-    # *  _maxrepetitions_ - Number of OID-value pairs to be returned for each OID
+    # *  _nonrepeaters_ - Number of OIDs passed to which exactly one result will be returned (default is 0)
+    # *  _maxrepetitions_ - Number of OID-value pairs to be returned for each OID (default is 10)
 
     def getbulk(oids, args = {})
       request = SnmpGetBulkRequest.new(self, oids, args.merge(:version => :SNMPv2c))

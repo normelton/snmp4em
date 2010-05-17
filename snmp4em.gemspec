@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{snmp4em}
-  s.version = "0.2.0"
+  s.version = "0.2.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.2") if s.respond_to? :required_rubygems_version=
   s.authors = ["Norman Elton"]
-  s.date = %q{2010-05-16}
+  s.date = %q{2010-05-17}
   s.description = %q{A high-performance SNMP engine built on EventMachine and Ruby-SNMP, supporting SNMPv1 and SNMPv2 operations}
   s.email = %q{normelton@gmail.com}
   s.extra_rdoc_files = ["README"]
