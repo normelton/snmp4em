@@ -1,8 +1,9 @@
-$:.unshift File.expand_path(File.dirname(File.expand_path(__FILE__)))
+$:.unshift File.dirname(File.expand_path(__FILE__))
 
 require 'eventmachine'
 require 'snmp'
-require 'snmp4em/common'
+
+require 'snmp4em/extensions'
 require 'snmp4em/handler'
 require 'snmp4em/snmp_connection'
 require 'snmp4em/snmp_v1'
