@@ -54,7 +54,6 @@ module SNMP4EM
         @max_results -= 1 unless @max_results.nil?
       else
         error_oid = @pending_oids.delete_at(responses.error_index - 1)
-        
         @responses[error_oid.to_s] = SNMP::ResponseError.new(response.error_status)
         @error_retries -= 1
       end
