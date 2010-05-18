@@ -23,52 +23,45 @@ module SNMP4EM
       @return_raw  = args[:return_raw]  || false
       @max_results = args[:max_results] || nil
       
-      @responses = Hash.new
-      @pending_oids = SNMP::VarBindList.new(oids).collect{|r| r.name}
+      @responses = {}
+      @pending_oids = oids.collect { |oid_str| SNMP::ObjectId.new(oid_str) }
 
       init_callbacks
       send
     end
     
     def handle_response(response) #:nodoc:
-      oids_to_delete = []
+      if response.error_status == :noError
+        responses_by_walk_oid = {}
 
-      if (response.error_status == :noError)
         response.varbind_list.each_index do |i|
           walk_oid = @pending_oids[i]
           response_vb = response.varbind_list[i]
-          
-          # Initialize the responses array if necessary
-          @responses[walk_oid.to_s] ||= Array.new
-          
-          # If the incoming response-oid begins with the walk-oid, then append the pairing
-          # to the @response array. Otherwise, add it to the list of oids ready to delete
-          if (response_vb.name[0,walk_oid.length] == walk_oid)
-            @responses[walk_oid.to_s] << [response_vb.name, response_vb.value]
+
+          if response_vb.name.to_s.start_with?(walk_oid.to_s)
+            responses_by_walk_oid[walk_oid] = response_vb
           else
-            # If we were to delete thid oid from @pending_oids now, it would mess up the
-            # @pending_oids[i] call above.
-            oids_to_delete << walk_oid
+            @pending_oids.delete_at(i)
           end
+        end
+          
+        responses_by_walk_oid.each do |walk_oid, response_vb|
+          @responses[walk_oid.to_s] ||= []
+          value = @return_raw || !response_vb.value.respond_to?(:rubify) ? response_vb.value : response_vb.value.rubify
+          @responses[walk_oid.to_s] << [response_vb.name.to_s, value]
         end
       
         @max_results -= 1 unless @max_results.nil?
-      
       else
-        error_oid = @pending_oids[response.error_index - 1]
-        oids_to_delete << error_oid
+        error_oid = @pending_oids.delete_at(responses.error_index - 1)
         
         @responses[error_oid.to_s] = SNMP::ResponseError.new(response.error_status)
         @error_retries -= 1
       end
       
-      oids_to_delete.each{|oid| @pending_oids.delete oid}
-      
-      if (@pending_oids.empty? || (@error_retries < 0) || (@max_results.to_i < 0))
-        @responses.each_pair do |oid, value|
-          @responses[oid] = value.rubify if (!@return_raw && value.respond_to?(:rubify))
-        end
-        
+      if @error_retries < 0 
+        fail "exhausted all retries"
+      elsif @pending_oids.empty? || @max_results.to_i < 0
         # Send the @responses back to the requester, we're done!
         succeed @responses
       else
