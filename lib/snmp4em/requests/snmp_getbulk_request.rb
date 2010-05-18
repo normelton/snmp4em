@@ -17,7 +17,6 @@ module SNMP4EM
       @timeout_retries = @sender.retries
       @error_retries = oids.size
       
-      @version    = args[:version]
       @return_raw = args[:return_raw] || false
       
       @nonrepeaters = args[:nonrepeaters] || 0
@@ -95,7 +94,7 @@ module SNMP4EM
       request.max_repetitions = @maxrepetitions
       request.non_repeaters = @nonrepeaters
       
-      message = SNMP::Message.new(@version, @sender.community_ro, request)
+      message = SNMP::Message.new(@sender.version, @sender.community_ro, request)
 
       super(message)
     end

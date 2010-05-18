@@ -19,7 +19,6 @@ module SNMP4EM
       @timeout_retries = @sender.retries
       @error_retries = oids.size
       
-      @version    = args[:version]
       @return_raw = args[:return_raw] || false
       
       @responses = Hash.new
@@ -83,7 +82,7 @@ module SNMP4EM
 
       vb_list = SNMP::VarBindList.new(@pending_varbinds)
       request = SNMP::SetRequest.new(@snmp_id, vb_list)
-      message = SNMP::Message.new(@version, @sender.community_rw, request)
+      message = SNMP::Message.new(@sender.version, @sender.community_ro, request)
       
       super(message)
     end
