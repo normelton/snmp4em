@@ -10,9 +10,7 @@ module SNMP4EM
       attr_reader :socket
       
       def init_socket #:nodoc:
-        if @socket.nil?
-          @socket = EM::open_datagram_socket("0.0.0.0", 0, Handler)
-        end
+        @socket ||= EM::open_datagram_socket("0.0.0.0", 0, Handler)
       end
     end
     
@@ -28,10 +26,10 @@ module SNMP4EM
     # *  _retries_ - Number of retries before failing (default: 3)
     
     def initialize(args = {})
-      @host         = args[:host]         || "127.0.0.1"
-      @port         = args[:port]         || 161
-      @timeout      = args[:timeout]      || 1
-      @retries      = args[:retries]      || 3
+      @host    = args[:host]    || "127.0.0.1"
+      @port    = args[:port]    || 161
+      @timeout = args[:timeout] || 1
+      @retries = args[:retries] || 3
       
       self.class.init_socket
     end
