@@ -8,11 +8,9 @@ module SNMP4EM
       end
       
       response = message.pdu
-      request_id = response.request_id
-      
-      if (request = SnmpConnection.pending_requests.select{|r| r.snmp_id == request_id}.first)
-        request.handle_response(response)
-      end
+      request = SnmpConnection.pending_requests[response.request_id]
+
+      request.handle_response(response) if request
     end
   end
 end

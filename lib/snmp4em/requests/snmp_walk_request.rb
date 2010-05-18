@@ -4,7 +4,7 @@ module SNMP4EM
   # or errback() to retrieve the results.
 
   class SnmpWalkRequest < SnmpRequest
-    attr_reader :snmp_id
+    attr_accessor :snmp_id
 
     # For an SNMP-WALK request, @pending_oids will be a ruby array of SNMP::ObjectNames that need to be walked.
     # Note that this library supports walking multiple OIDs in parallel. Once any error-producing OIDs are removed,
@@ -79,7 +79,7 @@ module SNMP4EM
     private
     
     def send
-      @snmp_id = generate_snmp_id
+      SnmpConnection.manage_request(self)
 
       # This oids array will consist of all the oids that need to be getnext'd
       oids = Array.new

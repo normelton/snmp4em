@@ -2,7 +2,10 @@
 
 module SNMP4EM
   class SnmpConnection
-    @pending_requests = []
+    #
+    # @pending_requests maps a request's id to its SnmpRequest
+    #
+    @pending_requests = {}
     @socket = nil
     
     class << self
@@ -11,6 +14,14 @@ module SNMP4EM
       
       def init_socket #:nodoc:
         @socket ||= EM::open_datagram_socket("0.0.0.0", 0, Handler)
+      end
+
+      def manage_request(request)
+        begin
+          request.snmp_id = rand(2**31)  # Largest SNMP Signed INTEGER
+        end while SnmpConnection.pending_requests[request.snmp_id]
+
+        @pending_requests[request.snmp_id] = request
       end
     end
     

@@ -4,7 +4,7 @@ module SNMP4EM
   # or errback() to retrieve the results.
 
   class SnmpGetRequest < SnmpRequest
-    attr_reader :snmp_id
+    attr_accessor :snmp_id
 
     # For an SNMP-GET request, @pending_oids will be a ruby array of SNMP::ObjectNames that need to be fetched. As
     # responses come back from the agent, this array will be pruned of any error-producing OIDs. Once no errors
@@ -62,9 +62,9 @@ module SNMP4EM
     private
 
     def send
-      # Send the contents of @pending_oids
+      SnmpConnection.manage_request(self)
 
-      @snmp_id = generate_snmp_id
+      # Send the contents of @pending_oids
 
       vb_list = SNMP::VarBindList.new(@pending_oids)
       request = SNMP::GetRequest.new(@snmp_id, vb_list)

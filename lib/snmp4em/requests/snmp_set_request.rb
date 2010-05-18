@@ -4,7 +4,7 @@ module SNMP4EM
   # or errback() to retrieve the results.
 
   class SnmpSetRequest < SnmpRequest
-    attr_reader :snmp_id
+    attr_accessor :snmp_id
 
     # For an SNMP-SET request, @pending_varbinds will by an SNMP::VarBindList, initially populated from the
     # provided oids hash. Variables can be passed as specific types from the SNMP library (i.e. SNMP::IpAddress)
@@ -76,9 +76,9 @@ module SNMP4EM
     private
     
     def send
+      SnmpConnection.manage_request(self)
+
       # Send the contents of @pending_varbinds
-      
-      @snmp_id = generate_snmp_id
 
       vb_list = SNMP::VarBindList.new(@pending_varbinds)
       request = SNMP::SetRequest.new(@snmp_id, vb_list)

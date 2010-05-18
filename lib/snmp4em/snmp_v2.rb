@@ -29,7 +29,6 @@ module SNMP4EM
  
     def get(oids, args = {})
       request = SnmpGetRequest.new(self, oids, args.merge(:version => :SNMPv2c))
-      SnmpConnection.pending_requests << request
       return request
     end
 
@@ -43,7 +42,6 @@ module SNMP4EM
 
     def getnext(oids, args = {})
       request = SnmpGetNextRequest.new(self, oids, args.merge(:version => :SNMPv2c))
-      SnmpConnection.pending_requests << request
       return request
     end
 
@@ -58,7 +56,6 @@ module SNMP4EM
 
     def set(oids, args = {})
       request = SnmpSetRequest.new(self, oids, args.merge(:version => :SNMPv2c))
-      SnmpConnection.pending_requests << request
       return request
     end
 
@@ -75,7 +72,6 @@ module SNMP4EM
 
     def walk(oids, args = {})
       request = SnmpWalkRequest.new(self, oids, args.merge(:version => :SNMPv2c))
-      SnmpConnection.pending_requests << request
       return request
     end
     
@@ -97,7 +93,6 @@ module SNMP4EM
 
     def getbulk(oids, args = {})
       request = SnmpGetBulkRequest.new(self, oids, args.merge(:version => :SNMPv2c))
-      SnmpConnection.pending_requests << request
       return request
     end
   end
