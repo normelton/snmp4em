@@ -39,7 +39,7 @@ A few definitions:
 A simple SNMP-GET:
 
   EM::run do
-	  snmp = SNMP4EM::SNMPv1.new(:host => "192.168.1.1")
+	  snmp = SNMP4EM::Manager.new(:host => "192.168.1.1", :version => :SNMPv1)
   
 	  request = snmp.get([OID_SYSNAME, OID_SYSLOCATION])
   
@@ -56,7 +56,7 @@ A simple SNMP-GET:
 A simple SNMP-GETNEXT:
 
   EM::run do
-    snmp = SNMP4EM::SNMPv1.new(:host => "192.168.1.1")
+    snmp = SNMP4EM::Manager.new(:host => "192.168.1.1")
 
     request = snmp.getnext([OID_SYSNAME])
 
@@ -73,7 +73,7 @@ A simple SNMP-GETNEXT:
 A simple SNMP-SET:
 
   EM::run do
-    snmp = SNMP4EM::SNMPv1.new(:host => "192.168.1.1")
+    snmp = SNMP4EM::Manager.new(:host => "192.168.1.1")
 
     request = snmp.set({OID_SYSNAME => "My System Name", OID_SYSLOCATION => "My System Location"})
 
@@ -99,7 +99,7 @@ A simple SNMP-SET:
 A simple SNMP-WALK:
 
   EM::run do
-    snmp = SNMP4EM::SNMPv1.new(:host => "192.168.1.1")
+    snmp = SNMP4EM::Manager.new(:host => "192.168.1.1")
 
     request = snmp.walk([OID_SYSTEM])
 
@@ -121,7 +121,7 @@ A simple SNMP-WALK:
 A simple SNMP-GET-BULK:
 
   EM::run do
-    snmp = SNMP4EM::SNMPv2.new(:host => "192.168.1.1")
+    snmp = SNMP4EM::Manager.new(:host => "192.168.1.1")
 
     request = snmp.getbulk([OID_SYSTEM])
 
@@ -149,6 +149,10 @@ Version 0.1.0:
 Version 0.2.0:
 
 * Added support for SNMPv2, including GET-BULK operations
+
+Version 0.2.1:
+
+* Code cleanups, speed increases
 
 == Developer Contact Information
 

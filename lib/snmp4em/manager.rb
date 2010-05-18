@@ -1,7 +1,9 @@
 # The SNMP4EM library 
 
 module SNMP4EM
-  class SnmpConnection
+  class Manager
+    include SNMP4EM::CommonRequests
+
     #
     # @pending_requests maps a request's id to its SnmpRequest
     #
@@ -19,13 +21,13 @@ module SNMP4EM
       def manage_request(request)
         begin
           request.snmp_id = rand(2**31)  # Largest SNMP Signed INTEGER
-        end while SnmpConnection.pending_requests[request.snmp_id]
+        end while @pending_requests[request.snmp_id]
 
         @pending_requests[request.snmp_id] = request
       end
     end
     
-    attr_reader :host, :port, :timeout, :retries
+    attr_reader :host, :port, :timeout, :retries, :version, :community_ro, :community_rw
     
     # Creates a new object to communicate with SNMPv1 agents. Optionally pass in the following parameters:
     # *  _host_ - IP/hostname of remote agent (default: 127.0.0.1)
@@ -41,6 +43,12 @@ module SNMP4EM
       @port    = args[:port]    || 161
       @timeout = args[:timeout] || 1
       @retries = args[:retries] || 3
+      @version = args[:version] || :SNMPv2c
+
+      self.extend SNMPv2cRequests if @version == :SNMPv2c
+
+      @community_ro = args[:community_ro] || args[:community] || "public"
+      @community_rw = args[:community_rw] || args[:community] || "public"
       
       self.class.init_socket
     end
@@ -48,5 +56,6 @@ module SNMP4EM
     def send(message) #:nodoc:
       self.class.socket.send_datagram message.encode, @host, @port
     end
+
   end
 end
