@@ -19,6 +19,8 @@ module SNMP4EM
       end
 
       def track_request(request)
+        @pending_requests.delete(request.snmp_id)
+
         begin
           request.snmp_id = rand(2**31)  # Largest SNMP Signed INTEGER
         end while @pending_requests[request.snmp_id]
