@@ -2,6 +2,8 @@ module SNMP4EM
   class SnmpRequest #:nodoc:
     include EM::Deferrable
 
+    attr_accessor :timeout_timer
+
     def initialize(sender, oids, args = {}) #:nodoc:
       _oids = [*oids]
 
@@ -23,12 +25,11 @@ module SNMP4EM
     def init_callbacks
       self.callback do
         Manager.pending_requests.delete(@snmp_id)
-        @timeout_timer.cancel
       end
       
       self.errback do
-        Manager.pending_requests.delete(@snmp_id)
         @timeout_timer.cancel
+        Manager.pending_requests.delete(@snmp_id)
       end
     end
 

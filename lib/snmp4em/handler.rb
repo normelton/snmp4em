@@ -17,7 +17,11 @@ module SNMP4EM
       # pruned from the Manager, so the response is to an expired
       # request, ignore it.
       #
-      request.handle_response(response) if request
+
+      if request
+        request.timeout_timer.cancel
+        request.handle_response(response)
+      end
     end
   end
 end
