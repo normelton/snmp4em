@@ -3,16 +3,18 @@ module SNMP4EM
     include EM::Deferrable
 
     def initialize(sender, oids, args = {}) #:nodoc:
+      _oids = [*oids]
+
       @sender = sender
       
       @timeout_timer = nil
       @timeout_retries = @sender.retries
-      @error_retries = oids.size
+      @error_retries = _oids.size
       
       @return_raw = args[:return_raw] || false
       
       @responses = {}
-      @pending_oids = oids.collect { |oid_str| SNMP::ObjectId.new(oid_str) }
+      @pending_oids = _oids.collect { |oid_str| SNMP::ObjectId.new(oid_str) }
 
       init_callbacks
       send

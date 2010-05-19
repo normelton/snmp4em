@@ -13,18 +13,20 @@ module SNMP4EM
     # are produced, the @responses object is populated and returned.
 
     def initialize(sender, oids, args = {}) #:nodoc:
+      _oids = [*oids]
+
       @sender = sender
       
       @timeout_timer = nil
       @timeout_retries = @sender.retries
-      @error_retries = oids.size
+      @error_retries = _oids.size
       
       @return_raw = args[:return_raw] || false
       
       @responses = Hash.new
       @pending_varbinds = SNMP::VarBindList.new()
       
-      oids.each_pair do |oid,value|
+      _oids.each_pair do |oid,value|
         if value.is_a? Integer
           snmp_value = SNMP::Integer.new(value)
         elsif value.is_a? String
