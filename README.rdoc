@@ -66,7 +66,7 @@ A simple SNMP-GETNEXT:
     end
 
     request.errback do |error|
-      puts "GET got error #{error}"
+      puts "GETNEXT got error #{error}"
     end
   }
 
@@ -92,7 +92,7 @@ A simple SNMP-SET:
     end
 
     request.errback do |error|
-      puts "GET got error #{error}"
+      puts "SET got error #{error}"
     end
   }
 
@@ -114,7 +114,7 @@ A simple SNMP-WALK:
     end
 
     request.errback do |error|
-      puts "GET got error #{error}"
+      puts "WALK got error #{error}"
     end
   }
 
@@ -136,7 +136,7 @@ A simple SNMP-GET-BULK:
     end
 
     request.errback do |error|
-      puts "GET got error #{error}"
+      puts "GET-BULK got error #{error}"
     end
   }
 

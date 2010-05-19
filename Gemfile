@@ -3,3 +3,5 @@
 
 gem "eventmachine", "0.12.10"
 gem "snmp", "1.0.2"
+
+gem "rspec", "1.3.0"
