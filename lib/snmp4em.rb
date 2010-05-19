@@ -1,5 +1,8 @@
 $:.unshift File.dirname(File.expand_path(__FILE__))
 
+gem "eventmachine", "0.12.10"
+gem "snmp", "1.0.2"
+
 require 'eventmachine'
 require 'snmp'
 
