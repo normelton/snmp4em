@@ -1,7 +1,6 @@
 module SNMP4EM
   
-  # Returned from SNMP4EM::SNMPv1.get(). This implements EM::Deferrable, so you can hang a callback()
-  # or errback() to retrieve the results.
+  # This implements EM::Deferrable, so you can hang a callback() or errback() to retrieve the results.
 
   class SnmpGetBulkRequest < SnmpRequest
     attr_accessor :snmp_id
@@ -11,26 +10,14 @@ module SNMP4EM
     # are returned, the @responses hash will be populated and returned.
 
     def initialize(sender, oids, args = {}) #:nodoc:
-      @sender = sender
-      
-      @timeout_timer = nil
-      @timeout_retries = @sender.retries
-      @error_retries = oids.size
-      
-      @return_raw = args[:return_raw] || false
-      
       @nonrepeaters = args[:nonrepeaters] || 0
       @maxrepetitions = args[:maxrepetitions] || 10
       
-      @responses = Hash.new
-      @pending_oids = SNMP::VarBindList.new(oids).collect{|r| r.name}
-
-      init_callbacks
-      send
+      super
     end
     
     def handle_response(response) #:nodoc:
-      if (response.error_status == :noError)
+      if response.error_status == :noError
         # No errors, populate the @responses object so it can be returned
 
         @nonrepeaters.times do |i|

@@ -9,22 +9,6 @@ module SNMP4EM
     # responses come back from the agent, this array will be pruned of any error-producing OIDs. Once no errors
     # are returned, the @responses hash will be populated and returned.
 
-    def initialize(sender, oids, args = {}) #:nodoc:
-      @sender = sender
-      
-      @timeout_timer = nil
-      @timeout_retries = @sender.retries
-      @error_retries = oids.size
-      
-      @return_raw = args[:return_raw] || false
-      
-      @responses = {}
-      @pending_oids = oids.collect { |oid_str| SNMP::ObjectId.new(oid_str) }
-
-      init_callbacks
-      send
-    end
-    
     def handle_response(response) #:nodoc:
       if response.error_status == :noError
         # No errors, populate the @responses object so it can be returned

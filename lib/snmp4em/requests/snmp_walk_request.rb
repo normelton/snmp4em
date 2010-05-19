@@ -12,27 +12,12 @@ module SNMP4EM
     # If so, the incoming OID/value pair is appended to the @response hash, and will be used in subsequent GETNEXT
     # requests. Once an OID is returned that does not begin with the walk OID, that walk OID is removed from the
     # @pending_oids array.
-
-    def initialize(sender, oids, args = {}) #:nodoc:
-      @sender = sender
-      
-      @timeout_timer = nil
-      @timeout_retries = @sender.retries
-      @error_retries = oids.size
-      
-      @return_raw  = args[:return_raw]  || false
-      @max_results = args[:max_results] || nil
-      
-      @responses = {}
-      @pending_oids = oids.collect { |oid_str| SNMP::ObjectId.new(oid_str) }
-
-      init_callbacks
-      send
-    end
     
     def handle_response(response) #:nodoc:
       if response.error_status == :noError
         responses_by_walk_oid = {}
+
+        oid_indexes_to_delete = []
 
         response.varbind_list.each_index do |i|
           walk_oid = @pending_oids[i]
@@ -41,8 +26,12 @@ module SNMP4EM
           if response_vb.name.to_s.start_with?(walk_oid.to_s)
             responses_by_walk_oid[walk_oid] = response_vb
           else
-            @pending_oids.delete_at(i)
+            oid_indexes_to_delete << i
           end
+        end
+
+        oid_indexes_to_delete.each do |i|
+          @pending_oids.delete_at(i)
         end
           
         responses_by_walk_oid.each do |walk_oid, response_vb|
