@@ -48,7 +48,7 @@ module SNMP4EM
       end
       
       if @error_retries < 0 
-        fail "exhausted all retries"
+        fail "exhausted all error retries"
       elsif @pending_oids.empty? || @max_results.to_i < 0
         # Send the @responses back to the requester, we're done!
         succeed @responses

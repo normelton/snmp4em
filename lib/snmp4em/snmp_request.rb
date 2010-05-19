@@ -42,7 +42,7 @@ module SNMP4EM
           send
           @timeout_retries -= 1
         else
-          fail("timeout")
+          fail "exhausted all timeout retries"
         end
       end
     end
