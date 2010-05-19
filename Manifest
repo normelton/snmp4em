@@ -1,4 +1,4 @@
-README
+README.rdoc
 Rakefile
 lib/snmp4em.rb
 lib/snmp4em/common_requests.rb
