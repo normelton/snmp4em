@@ -71,7 +71,7 @@ module SNMP4EM
     private
 
     def send
-      Manager.manage_request(self)
+      Manager.track_request(self)
 
       # Send the contents of @pending_oids
 

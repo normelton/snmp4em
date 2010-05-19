@@ -18,7 +18,7 @@ module SNMP4EM
         @socket ||= EM::open_datagram_socket("0.0.0.0", 0, Handler)
       end
 
-      def manage_request(request)
+      def track_request(request)
         begin
           request.snmp_id = rand(2**31)  # Largest SNMP Signed INTEGER
         end while @pending_requests[request.snmp_id]

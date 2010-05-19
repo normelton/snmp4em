@@ -60,7 +60,7 @@ module SNMP4EM
     private
     
     def send
-      Manager.manage_request(self)
+      Manager.track_request(self)
 
       # This oids array will consist of all the oids that need to be getnext'd
       oids = Array.new
