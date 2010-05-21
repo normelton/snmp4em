@@ -1,18 +1,20 @@
 module SNMP4EM
 
-  # Returned from SNMP4EM::SNMPv1.walk(). This implements EM::Deferrable, so you can hang a callback()
-  # or errback() to retrieve the results.
+  # This implements EM::Deferrable, so you can hang a callback() or errback() to retrieve the results.
 
   class SnmpWalkRequest < SnmpRequest
     attr_accessor :snmp_id
 
-    # For an SNMP-WALK request, @pending_oids will be a ruby array of SNMP::ObjectNames that need to be walked.
-    # Note that this library supports walking multiple OIDs in parallel. Once any error-producing OIDs are removed,
-    # a series of SNMP-GETNEXT requests are sent. Each response OID is checked to see if it begins with the walk OID.
-    # If so, the incoming OID/value pair is appended to the @response hash, and will be used in subsequent GETNEXT
-    # requests. Once an OID is returned that does not begin with the walk OID, that walk OID is removed from the
-    # @pending_oids array.
-    
+    # SNMP-WALK is faked using GETNEXT queries until the returned OID isn't a subtree of the walk OID.
+    #
+    # @next_oids is a hash that maps the base walk OID to the next OID to be queried.
+    #
+    # @query_indexes simply tracks the order in which the next_oids were packaged up, in order to
+    # determine which query left the subtree
+    #
+    # Note that this library supports walking multiple base OIDs in parallel, and that the walk fails
+    # atomically with a list of OIDS that failed to gather.
+    #
     def handle_response(response) #:nodoc:
       if response.error_status == :noError
 
@@ -26,7 +28,7 @@ module SNMP4EM
             @responses[response_walk_oid.to_s][response_oid.dup.pop] = value
             @next_oids[response_walk_oid] = response_oid
           else
-            @next_oids.delete(@last_query[i])
+            @next_oids.delete(@query_indexes[i])
           end
         end
       
@@ -65,13 +67,13 @@ module SNMP4EM
       end
       
       #
-      # @last_query maps the index of the requested oid to the walk oid
+      # @query_indexes maps the index of the requested oid to the walk oid
       #
       i = 0
-      @last_query = {}
+      @query_indexes = {}
       query_oids = \
         @next_oids.collect do |walk_oid, next_oid|
-          @last_query[i] = walk_oid
+          @query_indexes[i] = walk_oid
           i += 1
           next_oid
         end
