@@ -15,25 +15,19 @@ module SNMP4EM
     
     def handle_response(response) #:nodoc:
       if response.error_status == :noError
-        responses_by_walk_oid = {}
 
         response.varbind_list.each_index do |i|
-          walk_oid = @pending_oids[i]
           response_vb = response.varbind_list[i]
+          response_oid = response_vb.name
+          response_walk_oid = response_oid.dup; response_walk_oid.pop
 
-          if response_vb.name.to_s.start_with?(walk_oid.to_s)
-            responses_by_walk_oid[walk_oid] = response_vb
-            @next_oids[walk_oid] = response_vb.name
+          if @responses[response_walk_oid.to_s]
+            value = @return_raw || !response_vb.value.respond_to?(:rubify) ? response_vb.value : response_vb.value.rubify
+            @responses[response_walk_oid.to_s][response_oid.dup.pop] = value
+            @next_oids[response_walk_oid] = response_oid
           else
-            @next_oids.delete(walk_oid)
+            @next_oids.delete(@last_query[i])
           end
-        end
-
-        responses_by_walk_oid.each do |walk_oid, response_vb|
-          @responses[walk_oid.to_s] ||= {}
-          value = @return_raw || !response_vb.value.respond_to?(:rubify) ? response_vb.value : response_vb.value.rubify
-          index = response_vb.name.to_s.gsub("#{walk_oid.to_s}.", '').to_i
-          @responses[walk_oid.to_s][index] = value
         end
       
         @max_results -= 1 unless @max_results.nil?
@@ -58,15 +52,31 @@ module SNMP4EM
     def send
       Manager.track_request(self)
 
+      #
+      # @next_oids maps the walk oid to its next getnext oid
+      #
       unless @next_oids
+        @responses = {}
         @next_oids = {}
         @pending_oids.each do |walk_oid|
           @next_oids[walk_oid] = walk_oid
+          @responses[walk_oid.to_s] = {}
         end
       end
       
+      #
+      # @last_query maps the index of the requested oid to the walk oid
+      #
+      i = 0
+      @last_query = {}
+      query_oids = \
+        @next_oids.collect do |walk_oid, next_oid|
+          @last_query[i] = walk_oid
+          i += 1
+          next_oid
+        end
 
-      vb_list = SNMP::VarBindList.new(@next_oids.values)
+      vb_list = SNMP::VarBindList.new(query_oids)
       request = SNMP::GetNextRequest.new(@snmp_id, vb_list)
       message = SNMP::Message.new(@sender.version, @sender.community_ro, request)
       
