@@ -39,7 +39,7 @@ module SNMP4EM
       @timeout_timer.cancel if @timeout_timer.is_a?(EM::Timer)
 
       @timeout_timer = EM::Timer.new(@sender.timeout) do
-        if (@timeout_retries > 0)
+        if @timeout_retries > 0
           send
           @timeout_retries -= 1
         else

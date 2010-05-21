@@ -17,39 +17,35 @@ module SNMP4EM
       if response.error_status == :noError
         responses_by_walk_oid = {}
 
-        oid_indexes_to_delete = []
-
         response.varbind_list.each_index do |i|
           walk_oid = @pending_oids[i]
           response_vb = response.varbind_list[i]
 
           if response_vb.name.to_s.start_with?(walk_oid.to_s)
             responses_by_walk_oid[walk_oid] = response_vb
+            @next_oids[walk_oid] = response_vb.name
           else
-            oid_indexes_to_delete << i
+            @next_oids.delete(walk_oid)
           end
         end
 
-        oid_indexes_to_delete.each do |i|
-          @pending_oids.delete_at(i)
-        end
-          
         responses_by_walk_oid.each do |walk_oid, response_vb|
-          @responses[walk_oid.to_s] ||= []
+          @responses[walk_oid.to_s] ||= {}
           value = @return_raw || !response_vb.value.respond_to?(:rubify) ? response_vb.value : response_vb.value.rubify
-          @responses[walk_oid.to_s] << [response_vb.name.to_s, value]
+          index = response_vb.name.to_s.gsub("#{walk_oid.to_s}.", '').to_i
+          @responses[walk_oid.to_s][index] = value
         end
       
         @max_results -= 1 unless @max_results.nil?
       else
-        error_oid = @pending_oids.delete_at(responses.error_index - 1)
-        @responses[error_oid.to_s] = SNMP::ResponseError.new(response.error_status)
+        @errors ||= []
+        error_oid = response.varbind_list[response.error_index].name
+        @errors << SNMP::ResponseError.new("Couldn't gather: #{error_oid} -> #{response.error_status}")
+        fail @errors if @error_retries < 1 
         @error_retries -= 1
       end
-      
-      if @error_retries < 0 
-        fail "exhausted all error retries"
-      elsif @pending_oids.empty? || @max_results.to_i < 0
+
+      if @next_oids.empty? || @max_results.to_i < 0
         # Send the @responses back to the requester, we're done!
         succeed @responses
       else
@@ -62,20 +58,15 @@ module SNMP4EM
     def send
       Manager.track_request(self)
 
-      # This oids array will consist of all the oids that need to be getnext'd
-      oids = Array.new
-      
-      @pending_oids.each do |oid|
-        # If there's already a response for this walk-oid, then use the last returned oid, otherwise
-        # start with the walk-oid.
-        if @responses.has_key?(oid.to_s)
-          oids << @responses[oid.to_s].last.first
-        else
-          oids << oid
+      unless @next_oids
+        @next_oids = {}
+        @pending_oids.each do |walk_oid|
+          @next_oids[walk_oid] = walk_oid
         end
       end
+      
 
-      vb_list = SNMP::VarBindList.new(oids)
+      vb_list = SNMP::VarBindList.new(@next_oids.values)
       request = SNMP::GetNextRequest.new(@snmp_id, vb_list)
       message = SNMP::Message.new(@sender.version, @sender.community_ro, request)
       
