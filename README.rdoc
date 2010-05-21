@@ -27,6 +27,12 @@ There are no plans to support SNMP v3.
 * EventMachine[http://rubyeventmachine.com], by Francis Cianfrocca and Aman Gupta
 * All the helpful folks on the Freenode #eventmachine channel
 
+== Usage
+
+1. Create manager.
+2. Create request.
+3. Assign callbacks/errbacks.
+4. Fire!
 
 == Examples
 
@@ -51,6 +57,8 @@ A simple SNMP-GET:
     request.errback do |error|
       puts "GET got error #{error}"
     end
+
+    request.fire
   }
 
 A simple SNMP-GETNEXT:
@@ -68,6 +76,8 @@ A simple SNMP-GETNEXT:
     request.errback do |error|
       puts "GETNEXT got error #{error}"
     end
+
+    request.fire
   }
 
 A simple SNMP-SET:
@@ -94,6 +104,8 @@ A simple SNMP-SET:
     request.errback do |error|
       puts "SET got error #{error}"
     end
+
+    request.fire
   }
 
 A simple SNMP-WALK:
@@ -116,6 +128,8 @@ A simple SNMP-WALK:
     request.errback do |error|
       puts "WALK got error #{error}"
     end
+
+    request.fire
   }
 
 A simple SNMP-GET-BULK:
@@ -138,13 +152,15 @@ A simple SNMP-GET-BULK:
     request.errback do |error|
       puts "GET-BULK got error #{error}"
     end
+
+    request.fire
   }
 
 == Change Log
 
 Version 0.2.1:
 
-* Code cleanups, speed boosts
+* Code cleanups, speed boosts, SnmpRequest#fire
 
 Version 0.2.0:
 
