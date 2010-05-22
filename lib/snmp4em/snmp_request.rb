@@ -19,6 +19,7 @@ module SNMP4EM
       @pending_oids = _oids.collect { |oid_str| SNMP::ObjectId.new(oid_str) }
 
       init_callbacks
+      send
     end
     
     def init_callbacks
@@ -30,11 +31,6 @@ module SNMP4EM
         @timeout_timer.cancel
         Manager.pending_requests.delete(@snmp_id)
       end
-    end
-
-    def fire
-      send unless @fired
-      @fired = true
     end
 
     def send(msg)
