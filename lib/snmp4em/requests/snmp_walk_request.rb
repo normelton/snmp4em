@@ -23,7 +23,7 @@ module SNMP4EM
           response_oid = response_vb.name
           response_walk_oid = response_oid.dup; response_walk_oid.pop
 
-          if @responses[response_walk_oid.to_s]
+          if response_walk_oid.subtree_of?(@query_indexes[i])
             value = @return_raw || !response_vb.value.respond_to?(:rubify) ? response_vb.value : response_vb.value.rubify
             @responses[response_walk_oid.to_s][response_oid.dup.pop] = value
             @next_oids[response_walk_oid] = response_oid
