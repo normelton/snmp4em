@@ -13,4 +13,5 @@ Echoe.new("snmp4em", "0.2.1") do |p|
   p.email                    = "normelton@gmail.com"
   p.development_dependencies = []
   p.rdoc_pattern             = ["lib", "README.rdoc"]
+  p.dependencies             = ["snmp"]
 end
