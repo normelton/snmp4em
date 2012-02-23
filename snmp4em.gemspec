@@ -17,16 +17,6 @@ Gem::Specification.new do |s|
   s.rubyforge_project = "snmp4em"
   s.rubygems_version = "1.8.16"
   s.summary = "A high-performance SNMP engine built on EventMachine and Ruby-SNMP"
-
-  if s.respond_to? :specification_version then
-    s.specification_version = 3
-
-    if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<snmp>, [">= 0"])
-    else
-      s.add_dependency(%q<snmp>, [">= 0"])
-    end
-  else
-    s.add_dependency(%q<snmp>, [">= 0"])
-  end
+  s.add_runtime_dependency 'snmp', '>= 1.0.2'
+  
 end

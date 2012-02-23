@@ -2,6 +2,6 @@
 # Use `bundle exec rake` in order to run the specs using the bundle
 
 gem "eventmachine", "0.12.10"
-gem "snmp", "1.0.2"
+gem "snmp", ">= 1.0.2"
 
 gem "rspec", "1.3.0"
