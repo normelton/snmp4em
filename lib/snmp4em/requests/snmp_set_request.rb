@@ -29,6 +29,8 @@ module SNMP4EM
           snmp_value = SNMP::Integer.new(value)
         elsif value.is_a? String
           snmp_value = SNMP::OctetString.new(value)
+        else
+          snmp_value = value
         end
         
         @pending_varbinds << SNMP::VarBind.new(oid,snmp_value)
