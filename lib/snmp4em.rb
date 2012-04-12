@@ -1,12 +1,16 @@
-$:.unshift File.expand_path(File.dirname(File.expand_path(__FILE__)))
+$:.unshift File.dirname(File.expand_path(__FILE__))
+
+gem "eventmachine", ">= 0.12.10"
+gem "snmp", ">= 1.0.2"
 
 require 'eventmachine'
 require 'snmp'
-require 'snmp4em/common'
+
+require 'snmp4em/extensions'
 require 'snmp4em/handler'
-require 'snmp4em/snmp_connection'
-require 'snmp4em/snmp_v1'
-require 'snmp4em/snmp_v2'
+require 'snmp4em/common_requests'
+require 'snmp4em/manager'
+require 'snmp4em/snmp_v2c_requests'
 require 'snmp4em/snmp_request'
 require 'snmp4em/requests/snmp_get_request'
 require 'snmp4em/requests/snmp_getbulk_request'

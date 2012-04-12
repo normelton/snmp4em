@@ -1,24 +1,35 @@
 module SNMP4EM
   class SnmpRequest #:nodoc:
     include EM::Deferrable
-    
-    def generate_snmp_id
-      begin
-        snmp_id = rand(1073741823)  # Largest Fixnum
-      end until (SnmpConnection.pending_requests.select{|r| r.snmp_id == snmp_id}.empty?)        
 
-      return snmp_id
+    attr_accessor :timeout_timer
+
+    def initialize(sender, oids, args = {}) #:nodoc:
+      _oids = [*oids]
+
+      @sender = sender
+      
+      @timeout_timer = nil
+      @timeout_retries = @sender.retries
+      @error_retries = _oids.size
+      
+      @return_raw = args[:return_raw] || false
+      
+      @responses = {}
+      @pending_oids = _oids.collect { |oid_str| SNMP::ObjectId.new(oid_str) }
+
+      init_callbacks
+      send
     end
-
+    
     def init_callbacks
       self.callback do
-        SnmpConnection.pending_requests.delete_if {|r| r.snmp_id == @snmp_id}
-        @timeout_timer.cancel
+        Manager.pending_requests.delete(@snmp_id)
       end
       
       self.errback do
-        SnmpConnection.pending_requests.delete_if {|r| r.snmp_id == @snmp_id}
         @timeout_timer.cancel
+        Manager.pending_requests.delete(@snmp_id)
       end
     end
 
@@ -28,11 +39,11 @@ module SNMP4EM
       @timeout_timer.cancel if @timeout_timer.is_a?(EM::Timer)
 
       @timeout_timer = EM::Timer.new(@sender.timeout) do
-        if (@timeout_retries > 0)
+        if @timeout_retries > 0
           send
           @timeout_retries -= 1
         else
-          fail("timeout")
+          fail "exhausted all timeout retries"
         end
       end
     end

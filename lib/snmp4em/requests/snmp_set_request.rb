@@ -4,7 +4,7 @@ module SNMP4EM
   # or errback() to retrieve the results.
 
   class SnmpSetRequest < SnmpRequest
-    attr_reader :snmp_id
+    attr_accessor :snmp_id
 
     # For an SNMP-SET request, @pending_varbinds will by an SNMP::VarBindList, initially populated from the
     # provided oids hash. Variables can be passed as specific types from the SNMP library (i.e. SNMP::IpAddress)
@@ -13,18 +13,20 @@ module SNMP4EM
     # are produced, the @responses object is populated and returned.
 
     def initialize(sender, oids, args = {}) #:nodoc:
+      _oids = [*oids]
+
       @sender = sender
       
       @timeout_timer = nil
       @timeout_retries = @sender.retries
-      @error_retries = oids.size
+      @error_retries = _oids.size
       
       @return_raw = args[:return_raw] || false
       
       @responses = Hash.new
       @pending_varbinds = SNMP::VarBindList.new()
       
-      oids.each_pair do |oid,value|
+      _oids.each_pair do |oid,value|
         if value.is_a? Integer
           snmp_value = SNMP::Integer.new(value)
         elsif value.is_a? String
@@ -78,13 +80,13 @@ module SNMP4EM
     private
     
     def send
+      Manager.track_request(self)
+
       # Send the contents of @pending_varbinds
-      
-      @snmp_id = generate_snmp_id
 
       vb_list = SNMP::VarBindList.new(@pending_varbinds)
       request = SNMP::SetRequest.new(@snmp_id, vb_list)
-      message = SNMP::Message.new(:SNMPv1, @sender.community_rw, request)
+      message = SNMP::Message.new(@sender.version, @sender.community_ro, request)
       
       super(message)
     end

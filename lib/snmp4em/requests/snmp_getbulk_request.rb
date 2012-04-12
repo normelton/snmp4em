@@ -1,37 +1,23 @@
 module SNMP4EM
   
-  # Returned from SNMP4EM::SNMPv1.get(). This implements EM::Deferrable, so you can hang a callback()
-  # or errback() to retrieve the results.
+  # This implements EM::Deferrable, so you can hang a callback() or errback() to retrieve the results.
 
   class SnmpGetBulkRequest < SnmpRequest
-    attr_reader :snmp_id
+    attr_accessor :snmp_id
 
     # For an SNMP-GETBULK request, @pending_oids will be a ruby array of SNMP::ObjectNames that need to be fetched. As
     # responses come back from the agent, this array will be pruned of any error-producing OIDs. Once no errors
     # are returned, the @responses hash will be populated and returned.
 
     def initialize(sender, oids, args = {}) #:nodoc:
-      @sender = sender
-      
-      @timeout_timer = nil
-      @timeout_retries = @sender.retries
-      @error_retries = oids.size
-      
-      @version = args[:version] || :SNMPv2c
-      @return_raw = args[:return_raw] || false
-      
       @nonrepeaters = args[:nonrepeaters] || 0
       @maxrepetitions = args[:maxrepetitions] || 10
       
-      @responses = Hash.new
-      @pending_oids = SNMP::VarBindList.new(oids).collect{|r| r.name}
-
-      init_callbacks
-      send
+      super
     end
     
     def handle_response(response) #:nodoc:
-      if (response.error_status == :noError)
+      if response.error_status == :noError
         # No errors, populate the @responses object so it can be returned
 
         @nonrepeaters.times do |i|
@@ -85,9 +71,9 @@ module SNMP4EM
     private
 
     def send
-      # Send the contents of @pending_oids
+      Manager.track_request(self)
 
-      @snmp_id = generate_snmp_id
+      # Send the contents of @pending_oids
 
       vb_list = SNMP::VarBindList.new(@pending_oids)
       request = SNMP::GetBulkRequest.new(@snmp_id, vb_list)
@@ -95,7 +81,7 @@ module SNMP4EM
       request.max_repetitions = @maxrepetitions
       request.non_repeaters = @nonrepeaters
       
-      message = SNMP::Message.new(@version, @sender.community_ro, request)
+      message = SNMP::Message.new(@sender.version, @sender.community_ro, request)
 
       super(message)
     end

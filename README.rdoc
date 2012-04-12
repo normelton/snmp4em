@@ -2,12 +2,12 @@
 
 == Summary
 
-This library extends the Ruby-SNMP[http://snmplib.rubyforge.org] to use the asynchronous EventMachine[http://rubyeventmachine.com] library for added performance and scalability. This allows code to scale monitoring applications to access a very high number of devices without the need for complex asynchronous I/O handling.
+This gem extends Ruby-SNMP[http://snmplib.rubyforge.org] to use the asynchronous EventMachine[http://rubyeventmachine.com] library for added performance and scalability. This allows code to scale monitoring applications to access a very high number of devices without the need for complex asynchronous I/O handling.
 
 
 == Features
 
-The initial version 0.1.0 of this software supports:
+Version 0.2.1 supports:
 
 * SNMP v1 and v2 only
 * SNMP Get, GetNext, GetBulk (v2 only), Set, and Walk requests.
@@ -38,27 +38,27 @@ A few definitions:
 
 A simple SNMP-GET:
 
-  EM::run do
-	  snmp = SNMP4EM::SNMPv1.new(:host => "192.168.1.1")
+  EM.run {
+    snmp = SNMP4EM::Manager.new(:host => "192.168.1.1", :version => :SNMPv1)
   
-	  request = snmp.get([OID_SYSNAME, OID_SYSLOCATION])
+    request = snmp.get([OID_SYSNAME, OID_SYSLOCATION])
   
-	  request.callback do |response|
-	    puts "System name = #{response[OID_SYSNAME]}"
-	    puts "System location = #{response[OID_SYSLOCATION]}"
-	  end
+    request.callback do |response|
+      puts "System name = #{response[OID_SYSNAME]}"
+      puts "System location = #{response[OID_SYSLOCATION]}"
+    end
   
-	  request.errback do |error|
-	    puts "GET got error #{error}"
-	  end
-	end
+    request.errback do |error|
+      puts "GET got error #{error}"
+    end
+  }
 
 A simple SNMP-GETNEXT:
 
-  EM::run do
-    snmp = SNMP4EM::SNMPv1.new(:host => "192.168.1.1")
+  EM.run {
+    snmp = SNMP4EM::Manager.new(:host => "192.168.1.1")
 
-    request = snmp.getnext([OID_SYSNAME])
+    request = snmp.getnext(OID_SYSNAME)
 
     request.callback do |response|
       r = response[OID_SYSNAME]
@@ -66,14 +66,14 @@ A simple SNMP-GETNEXT:
     end
 
     request.errback do |error|
-      puts "GET got error #{error}"
+      puts "GETNEXT got error #{error}"
     end
-  end
+  }
 
 A simple SNMP-SET:
 
-  EM::run do
-    snmp = SNMP4EM::SNMPv1.new(:host => "192.168.1.1")
+  EM.run {
+    snmp = SNMP4EM::Manager.new(:host => "192.168.1.1")
 
     request = snmp.set({OID_SYSNAME => "My System Name", OID_SYSLOCATION => "My System Location"})
 
@@ -92,16 +92,16 @@ A simple SNMP-SET:
     end
 
     request.errback do |error|
-      puts "GET got error #{error}"
+      puts "SET got error #{error}"
     end
-  end
+  }
 
 A simple SNMP-WALK:
 
-  EM::run do
-    snmp = SNMP4EM::SNMPv1.new(:host => "192.168.1.1")
+  EM.run {
+    snmp = SNMP4EM::Manager.new(:host => "192.168.1.1")
 
-    request = snmp.walk([OID_SYSTEM])
+    request = snmp.walk(OID_SYSTEM)
 
     request.callback do |response|
       if (response[OID_SYSTEM].is_a? Array)
@@ -114,16 +114,16 @@ A simple SNMP-WALK:
     end
 
     request.errback do |error|
-      puts "GET got error #{error}"
+      puts "WALK got error #{error}"
     end
-  end
+  }
 
 A simple SNMP-GET-BULK:
 
-  EM::run do
-    snmp = SNMP4EM::SNMPv2.new(:host => "192.168.1.1")
+  EM.run {
+    snmp = SNMP4EM::Manager.new(:host => "192.168.1.1")
 
-    request = snmp.getbulk([OID_SYSTEM])
+    request = snmp.getbulk(OID_SYSTEM)
 
     request.callback do |response|
       if (response[OID_SYSTEM].is_a? Array)
@@ -136,21 +136,24 @@ A simple SNMP-GET-BULK:
     end
 
     request.errback do |error|
-      puts "GET got error #{error}"
+      puts "GET-BULK got error #{error}"
     end
-  end
+  }
 
 == Change Log
 
-Version 0.1.0:
+Version 0.2.1:
 
-* Initial deployment, ability to run get/getnext/set/walk requests in parallel
+* Code cleanups, speed boosts
 
 Version 0.2.0:
 
 * Added support for SNMPv2, including GET-BULK operations
 
-== Developer Contact Information
+Version 0.1.0:
 
-Norman Elton
-normelton@gmail.com
+* Initial deployment, ability to run get/getnext/set/walk requests in parallel
+
+== Credits
+
+Author: Norman Elton  normelton@gmail.com

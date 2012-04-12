@@ -1,8 +1,13 @@
 # The SNMP4EM library 
 
 module SNMP4EM
-  class SnmpConnection
-    @pending_requests = []
+  class Manager
+    include SNMP4EM::CommonRequests
+
+    #
+    # @pending_requests maps a request's id to its SnmpRequest
+    #
+    @pending_requests = {}
     @socket = nil
     
     class << self
@@ -10,13 +15,21 @@ module SNMP4EM
       attr_reader :socket
       
       def init_socket #:nodoc:
-        if @socket.nil?
-          @socket = EM::open_datagram_socket("0.0.0.0", 0, Handler)
-        end
+        @socket ||= EM::open_datagram_socket("0.0.0.0", 0, Handler)
+      end
+
+      def track_request(request)
+        @pending_requests.delete(request.snmp_id)
+
+        begin
+          request.snmp_id = rand(2**31)  # Largest SNMP Signed INTEGER
+        end while @pending_requests[request.snmp_id]
+
+        @pending_requests[request.snmp_id] = request
       end
     end
     
-    attr_reader :host, :port, :timeout, :retries
+    attr_reader :host, :port, :timeout, :retries, :version, :community_ro, :community_rw
     
     # Creates a new object to communicate with SNMPv1 agents. Optionally pass in the following parameters:
     # *  _host_ - IP/hostname of remote agent (default: 127.0.0.1)
@@ -28,10 +41,16 @@ module SNMP4EM
     # *  _retries_ - Number of retries before failing (default: 3)
     
     def initialize(args = {})
-      @host         = args[:host]         || "127.0.0.1"
-      @port         = args[:port]         || 161
-      @timeout      = args[:timeout]      || 1
-      @retries      = args[:retries]      || 3
+      @host    = args[:host]    || "127.0.0.1"
+      @port    = args[:port]    || 161
+      @timeout = args[:timeout] || 1
+      @retries = args[:retries] || 3
+      @version = args[:version] || :SNMPv2c
+
+      self.extend SNMPv2cRequests if @version == :SNMPv2c
+
+      @community_ro = args[:community_ro] || args[:community] || "public"
+      @community_rw = args[:community_rw] || args[:community] || "public"
       
       self.class.init_socket
     end
@@ -39,5 +58,6 @@ module SNMP4EM
     def send(message) #:nodoc:
       self.class.socket.send_datagram message.encode, @host, @port
     end
+
   end
 end
