@@ -26,7 +26,7 @@ module SNMP4EM
       @responses = Hash.new
       @pending_varbinds = SNMP::VarBindList.new()
       
-      _oids.each_pair do |oid,value|
+      _oids.each do |oid,value|
         if value.is_a? Integer
           snmp_value = SNMP::Integer.new(value)
         elsif value.is_a? String
