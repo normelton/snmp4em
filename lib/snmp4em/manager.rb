@@ -4,6 +4,8 @@ module SNMP4EM
   class Manager
     include SNMP4EM::SNMPCommonRequests
 
+    MAX_INDEX = 2**31  # Largest SNMP Signed INTEGER
+
     #
     # @pending_requests maps a request's id to its SnmpRequest
     #
@@ -21,6 +23,7 @@ module SNMP4EM
           @socket = nil
         end
 
+        @next_index ||= rand(MAX_INDEX)
         @socket ||= EM::open_datagram_socket("0.0.0.0", 0, Handler)
       end
 
@@ -28,7 +31,8 @@ module SNMP4EM
         @pending_requests.delete(request.snmp_id)
 
         begin
-          request.snmp_id = rand(2**31)  # Largest SNMP Signed INTEGER
+          @next_index = (@next_index + 1) % MAX_INDEX
+          request.snmp_id = @next_index
         end while @pending_requests[request.snmp_id]
 
         @pending_requests[request.snmp_id] = request
