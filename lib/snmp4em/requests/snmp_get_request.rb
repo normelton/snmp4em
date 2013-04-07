@@ -10,6 +10,8 @@ module SNMP4EM
     # are returned, the @responses hash will be populated and returned.
 
     def handle_response(response) #:nodoc:
+      super
+      
       if response.error_status == :noError
         pending_oids.zip(response.varbind_list).each do |oid, response_vb|
           oid[:response] = format_value(response_vb)

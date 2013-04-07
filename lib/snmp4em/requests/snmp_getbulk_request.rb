@@ -19,6 +19,8 @@ module SNMP4EM
     end
     
     def handle_response(response) #:nodoc:
+      super
+      
       pending_repeating_oids = pending_oids.select{|oid| oid[:method] == :repeating}
       pending_non_repeating_oids = pending_oids.select{|oid| oid[:method] == :non_repeating}
 

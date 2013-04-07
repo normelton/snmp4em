@@ -10,13 +10,11 @@ module SNMP4EM
       @oids ||= [*oids].collect { |oid_str| { :requested_oid => SNMP::ObjectId.new(oid_str), :state => :pending }}
 
       @timeout_timer = nil
-      @timeout_retries = @sender.retries
+      @timeout_retries = args[:retries] || @sender.retries
       
       @return_raw = args[:return_raw] || false
       @max_results = args[:max_results] || nil
       
-      @responses = {}
-
       init_callbacks
       on_init(args) if respond_to?(:on_init)
       send
@@ -64,6 +62,10 @@ module SNMP4EM
           fail "exhausted all timeout retries"
         end
       end
+    end
+
+    def handle_response response
+      @timeout_timer.cancel
     end
   end
 end

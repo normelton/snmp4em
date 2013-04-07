@@ -19,7 +19,6 @@ module SNMP4EM
       #
 
       if request
-        request.timeout_timer.cancel
         request.handle_response(response)
       end
     end

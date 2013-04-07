@@ -11,6 +11,8 @@ module SNMP4EM
     # two-element array, in the form of [OID, VALUE], showing the next oid & value.
     
     def handle_response(response) #:nodoc:
+      super
+      
       if response.error_status == :noError
         pending_oids.zip(response.varbind_list).each do |oid, response_vb|
           oid[:response] = format_value(response_vb)
