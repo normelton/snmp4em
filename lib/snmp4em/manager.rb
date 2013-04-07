@@ -17,8 +17,8 @@ module SNMP4EM
       def init_socket #:nodoc:
         # When the socket is in error state, close the socket and re-open a new one.
         if !@socket.nil? && @socket.error?
-                @socket.close_connection
-                @socket = nil
+          @socket.close_connection
+          @socket = nil
         end
 
         @socket ||= EM::open_datagram_socket("0.0.0.0", 0, Handler)
