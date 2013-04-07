@@ -13,68 +13,36 @@ module SNMP4EM
     # are produced, the @responses object is populated and returned.
 
     def initialize(sender, oids, args = {}) #:nodoc:
-      _oids = [*oids]
-
-      @sender = sender
-      
-      @timeout_timer = nil
-      @timeout_retries = @sender.retries
-      @error_retries = _oids.size
-      
-      @return_raw = args[:return_raw] || false
-      
-      @responses = Hash.new
-      @pending_varbinds = SNMP::VarBindList.new()
-      
-      _oids.each do |oid,value|
-        if value.is_a? Integer
-          snmp_value = SNMP::Integer.new(value)
-        elsif value.is_a? String
-          snmp_value = SNMP::OctetString.new(value)
-        else
-          snmp_value = value
-        end
-        
-        @pending_varbinds << SNMP::VarBind.new(oid,snmp_value)
-      end
-
-      init_callbacks
-      send
+      @oids = [*oids].collect { |oid_str, value| { :requested_oid => SNMP::ObjectId.new(oid_str), :value => format_outgoing_value(value), :state => :pending, :response => nil }}
+      super
     end
     
     def handle_response(response) #:nodoc:
       if (response.error_status == :noError)
-        # No errors, set any remaining varbinds to true
-        response.each_varbind do |vb|
-          response_vb = @pending_varbinds.shift
-          @responses[response_vb.name.to_s] = true
+        pending_oids.zip(response.varbind_list).each do |oid, response_vb|
+          oid[:response] = true
+          oid[:state] = :complete
         end
       
       else
-        # Got an error, remove that varbind from @pending_varbinds so we can try again
-        error_vb = @pending_varbinds.delete_at(response.error_index - 1)
-        @responses[error_vb.name.to_s] = SNMP::ResponseError.new(response.error_status)
+        error_oid = pending_oids[response.error_index - 1]
+        error_oid[:state] = :error
+        error_oid[:error] = SNMP::ResponseError.new(response.error_status)
       end
       
-      if (@pending_varbinds.empty? || @error_retries.zero?)
-        until @pending_varbinds.empty?
-          error_vb = @pending_varbinds.shift
-          @responses[error_vb.name.to_s] = SNMP::ResponseError.new(:genErr)
+      if pending_oids.empty?
+        result = {}
+
+        @oids.each do |oid|
+          requested_oid = oid[:requested_oid]
+          result[requested_oid] = oid[:error] || oid[:response]
         end
 
-        unless @return_raw
-          @responses.each_pair do |oid, value|
-            @responses[oid] = value.rubify if value.respond_to?(:rubify)
-          end
-        end
-        
-        # Send the @responses back to the requester, we're done!
-        succeed @responses
-      else
-        @error_retries -= 1
-        
-        send
+        succeed result
+        return
       end
+    
+      send
     end
 
     private
@@ -82,11 +50,11 @@ module SNMP4EM
     def send
       Manager.track_request(self)
 
-      # Send the contents of @pending_varbinds
+      pending_varbinds = pending_oids.collect{|oid| SNMP::VarBind.new(oid[:requested_oid], oid[:value])}
 
-      vb_list = SNMP::VarBindList.new(@pending_varbinds)
+      vb_list = SNMP::VarBindList.new(pending_varbinds)
       request = SNMP::SetRequest.new(@snmp_id, vb_list)
-      message = SNMP::Message.new(@sender.version, @sender.community_ro, request)
+      message = SNMP::Message.new(@sender.version, @sender.community_rw, request)
       
       super(message)
     end

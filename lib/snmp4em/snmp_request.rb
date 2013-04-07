@@ -5,21 +5,39 @@ module SNMP4EM
     attr_accessor :timeout_timer
 
     def initialize(sender, oids, args = {}) #:nodoc:
-      _oids = [*oids]
-
       @sender = sender
       
+      @oids ||= [*oids].collect { |oid_str| { :requested_oid => SNMP::ObjectId.new(oid_str), :state => :pending }}
+
       @timeout_timer = nil
       @timeout_retries = @sender.retries
-      @error_retries = _oids.size
       
       @return_raw = args[:return_raw] || false
+      @max_results = args[:max_results] || nil
       
       @responses = {}
-      @pending_oids = _oids.collect { |oid_str| SNMP::ObjectId.new(oid_str) }
 
       init_callbacks
+      on_init(args) if respond_to?(:on_init)
       send
+    end
+
+    def pending_oids
+      @oids.select{|oid| oid[:state] == :pending}
+    end
+
+    def format_value vb
+      @return_raw || !vb.value.respond_to?(:rubify) ? vb.value : vb.value.rubify
+    end
+
+    def format_outgoing_value value
+      if value.is_a? Integer
+        return SNMP::Integer.new(value)
+      elsif value.is_a? String
+        return SNMP::OctetString.new(value)
+      else
+        return value
+      end
     end
     
     def init_callbacks

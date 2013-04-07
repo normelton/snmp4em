@@ -11,29 +11,30 @@ module SNMP4EM
 
     def handle_response(response) #:nodoc:
       if response.error_status == :noError
-        # No errors, populate the @responses object so it can be returned
-        response.each_varbind do |vb|
-          request_oid = @pending_oids.shift
-          value = @return_raw || !vb.value.respond_to?(:rubify) ? vb.value : vb.value.rubify
-
-          @responses[request_oid.to_s] = value
+        pending_oids.zip(response.varbind_list).each do |oid, response_vb|
+          oid[:response] = format_value(response_vb)
+          oid[:state] = :complete
         end
       
       else
-        # Got an error, remove that oid from @pending_oids so we can try again
-        error_oid = @pending_oids.delete_at(response.error_index - 1)
-        @responses[error_oid.to_s] = SNMP::ResponseError.new(response.error_status)
+        error_oid = pending_oids[response.error_index - 1]
+        error_oid[:state] = :error
+        error_oid[:error] = SNMP::ResponseError.new(response.error_status)
       end
 
-      if @error_retries < 0
-        fail "exhausted all retries"
-      elsif @pending_oids.empty?
-        # Send the @responses back to the requester, we're done!
-        succeed @responses
-      else
-        @error_retries -= 1
-        send
+      if pending_oids.empty?
+        result = {}
+
+        @oids.each do |oid|
+          requested_oid = oid[:requested_oid]
+          result[requested_oid] = oid[:error] || oid[:response]
+        end
+
+        succeed result
+        return
       end
+    
+      send
     end
 
     private
@@ -41,9 +42,9 @@ module SNMP4EM
     def send
       Manager.track_request(self)
 
-      # Send the contents of @pending_oids
+      query_oids = @oids.select{|oid| oid[:state] == :pending}.collect{|oid| oid[:requested_oid]}
 
-      vb_list = SNMP::VarBindList.new(@pending_oids)
+      vb_list = SNMP::VarBindList.new(query_oids)
       request = SNMP::GetRequest.new(@snmp_id, vb_list)
       message = SNMP::Message.new(@sender.version, @sender.community_ro, request)
 

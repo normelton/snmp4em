@@ -9,63 +9,59 @@ module SNMP4EM
     # responses come back from the agent, this array will be pruned of any error-producing OIDs. Once no errors
     # are returned, the @responses hash will be populated and returned.
 
-    def initialize(sender, oids, args = {}) #:nodoc:
-      @nonrepeaters = args[:nonrepeaters] || 0
-      @maxrepetitions = args[:maxrepetitions] || 10
-      
-      super
+    def on_init args
+      @oids.each_index do |i|
+        @oids[i][:responses] = {}
+        @oids[i][:method] = (i < (args[:non_repeaters] || 0) ? :non_repeating : :repeating)
+      end
+
+      @max_results ||= 10
     end
     
     def handle_response(response) #:nodoc:
+      pending_repeating_oids = pending_oids.select{|oid| oid[:method] == :repeating}
+      pending_non_repeating_oids = pending_oids.select{|oid| oid[:method] == :non_repeating}
+
       if response.error_status == :noError
         # No errors, populate the @responses object so it can be returned
 
-        @nonrepeaters.times do |i|
-          request_oid = @pending_oids.shift
-          response_vb = response.vb_list[i]
+        PP.pp response
 
-          @responses[request_oid.to_s] = [[response_vb.name, response_vb.value]]
+        vb_list = response.vb_list
+        vb_index = 0
+
+        pending_non_repeating_oids.each do |oid|
+          response_vb = vb_list.shift
+          oid[:responses][response_vb.name] = format_value(response_vb)
+          oid[:state] = :complete
         end
 
-        (@nonrepeaters ... response.vb_list.size).each do |i|
-          request_oid = @pending_oids[(i - @nonrepeaters) % @pending_oids.size]
-          response_vb = response.vb_list[i]
-          
-          @responses[request_oid.to_s] ||= Array.new
-          @responses[request_oid.to_s] << [response_vb.name, response_vb.value]
+        while response_vb = vb_list.shift
+          oid = pending_repeating_oids[vb_index % pending_repeating_oids.count]
+          oid[:responses][response_vb.name] = format_value(response_vb)
+          oid[:state] = :complete
+          vb_index += 1
         end
-        
-        @pending_oids.clear
         
       else
-        # Got an error, remove that oid from @pending_oids so we can try again
-        error_oid = @pending_oids.delete_at(response.error_index - 1)
-        @responses[error_oid.to_s] = SNMP::ResponseError.new(response.error_status)
+        error_oid = pending_oids[response.error_index - 1]
+        error_oid[:state] = :error
+        error_oid[:error] = SNMP::ResponseError.new(response.error_status)
       end
       
-      if (@pending_oids.empty? || @error_retries.zero?)
-        until @pending_oids.empty?
-          error_oid = @pending_oids.shift
-          @responses[error_oid.to_s] = SNMP::ResponseError.new(:genErr)
+      if pending_oids.empty?
+        result = {}
+
+        @oids.each do |oid|
+          requested_oid = oid[:requested_oid]
+          result[requested_oid] = oid[:error] || oid[:responses]
         end
-        
-        if (!@return_raw)
-          @responses.each_pair do |search_oid, values|
-            values.collect! do |oid_value|
-              oid_value[1] = oid_value[1].rubify if oid_value[1].respond_to?(:rubify)
-              oid_value
-            end
-          
-            @responses[search_oid] = values
-          end
-        end
-        
-        # Send the @responses back to the requester, we're done!
-        succeed @responses
-      else
-        @error_retries -= 1
-        send
+
+        succeed result
+        return
       end
+
+      send
     end
 
     private
@@ -73,15 +69,15 @@ module SNMP4EM
     def send
       Manager.track_request(self)
 
-      # Send the contents of @pending_oids
-
-      vb_list = SNMP::VarBindList.new(@pending_oids)
+      vb_list = SNMP::VarBindList.new(pending_oids.collect{|oid| oid[:requested_oid]})
       request = SNMP::GetBulkRequest.new(@snmp_id, vb_list)
       
-      request.max_repetitions = @maxrepetitions
-      request.non_repeaters = @nonrepeaters
+      request.max_repetitions = @max_results
+      request.non_repeaters = pending_oids.select{|oid| oid[:method] == :non_repeating}.count
       
       message = SNMP::Message.new(@sender.version, @sender.community_ro, request)
+
+      PP.pp request
 
       super(message)
     end
