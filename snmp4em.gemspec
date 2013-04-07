@@ -18,5 +18,6 @@ Gem::Specification.new do |s|
   s.rubygems_version = "1.8.16"
   s.summary = "A high-performance SNMP engine built on EventMachine and Ruby-SNMP"
   s.add_runtime_dependency 'snmp', '>= 1.0.2'
+  s.add_runtime_dependency 'eventmachine', '>= 1.0.0'
   
 end

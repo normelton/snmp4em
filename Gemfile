@@ -1,7 +1,5 @@
-# Use `bundle install` in order to install these gems
-# Use `bundle exec rake` in order to run the specs using the bundle
+source 'https://rubygems.org'
 
-gem "eventmachine", "0.12.10"
-gem "snmp", ">= 1.0.2"
+# Specify your gem's dependencies in auth_support.gemspec
+gemspec
 
-gem "rspec", "1.3.0"
