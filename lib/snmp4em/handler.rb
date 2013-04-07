@@ -10,7 +10,6 @@ module SNMP4EM
       end
       
       response = message.pdu
-      request = Manager.pending_requests[response.request_id]
 
       #
       # in the event of a timeout retry, the request will have been 
@@ -18,7 +17,7 @@ module SNMP4EM
       # request, ignore it.
       #
 
-      if request
+      if request = Manager.pending_requests[response.request_id]
         request.handle_response(response)
       end
     end
