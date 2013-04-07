@@ -1,7 +1,7 @@
 # The SNMP4EM library 
 
 module SNMP4EM
-  module CommonRequests
+  module SNMPCommonRequests
     # Sends an SNMP-GET request to the remote agent for all OIDs specified in the _oids_ array. Returns a SnmpGetRequest object,
     # which implements EM::Deferrable. From there, implement a callback/errback to fetch the result. On success, the result will be
     # a hash, mapping requested OID values to results.

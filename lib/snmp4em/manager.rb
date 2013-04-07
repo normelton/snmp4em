@@ -2,7 +2,7 @@
 
 module SNMP4EM
   class Manager
-    include SNMP4EM::CommonRequests
+    include SNMP4EM::SNMPCommonRequests
 
     #
     # @pending_requests maps a request's id to its SnmpRequest
