@@ -15,7 +15,7 @@ module SNMP4EM
       
       if response.error_status == :noError
         pending_oids.zip(response.varbind_list).each do |oid, response_vb|
-          oid[:response] = format_value(response_vb)
+          oid[:response] = [response_vb.name.to_s, format_value(response_vb)]
           oid[:state] = :complete
         end
 
