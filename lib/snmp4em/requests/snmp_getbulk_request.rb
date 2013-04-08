@@ -27,8 +27,6 @@ module SNMP4EM
       if response.error_status == :noError
         # No errors, populate the @responses object so it can be returned
 
-        PP.pp response
-
         vb_list = response.vb_list
         vb_index = 0
 
@@ -55,7 +53,7 @@ module SNMP4EM
         result = {}
 
         @oids.each do |oid|
-          requested_oid = oid[:requested_oid]
+          requested_oid = oid[:requested_string]
           result[requested_oid] = oid[:error] || oid[:responses]
         end
 

@@ -28,7 +28,7 @@ module SNMP4EM
         result = {}
 
         @oids.each do |oid|
-          requested_oid = oid[:requested_oid]
+          requested_oid = oid[:requested_string]
           result[requested_oid] = oid[:error] || oid[:response]
         end
 

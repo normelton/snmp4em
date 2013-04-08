@@ -13,7 +13,7 @@ module SNMP4EM
     # are produced, the @responses object is populated and returned.
 
     def initialize(sender, oids, args = {}) #:nodoc:
-      @oids = [*oids].collect { |oid_str, value| { :requested_oid => SNMP::ObjectId.new(oid_str), :value => format_outgoing_value(value), :state => :pending, :response => nil }}
+      @oids = [*oids].collect { |oid_str, value| { :requested_oid => SNMP::ObjectId.new(oid_str), :requested_string => oid_str, :value => format_outgoing_value(value), :state => :pending, :response => nil }}
       super
     end
     
@@ -36,7 +36,7 @@ module SNMP4EM
         result = {}
 
         @oids.each do |oid|
-          requested_oid = oid[:requested_oid]
+          requested_oid = oid[:requested_string]
           result[requested_oid] = oid[:error] || oid[:response]
         end
 

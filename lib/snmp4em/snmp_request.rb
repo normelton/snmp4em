@@ -7,7 +7,7 @@ module SNMP4EM
     def initialize(sender, oids, args = {}) #:nodoc:
       @sender = sender
       
-      @oids ||= [*oids].collect { |oid_str| { :requested_oid => SNMP::ObjectId.new(oid_str), :state => :pending }}
+      @oids ||= [*oids].collect { |oid_str| { :requested_string => oid_str, :requested_oid => SNMP::ObjectId.new(oid_str), :state => :pending }}
 
       @timeout_timer = nil
       @timeout_retries = args[:retries] || @sender.retries
