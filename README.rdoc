@@ -7,16 +7,15 @@ This gem extends Ruby-SNMP[http://snmplib.rubyforge.org] to use the asynchronous
 
 == Features
 
-Version 0.2.1 supports:
+Version 1.0.0 supports:
 
-* SNMP v1 and v2 only
-* SNMP Get, GetNext, GetBulk (v2 only), Set, and Walk requests.
+* SNMP v1 and v2 
+* SNMP Get, GetNext, Set, and Walk requests. For SNMPv2 clients, GetBulk and WalkBulk
 * Ability to query/set/walk multiple OIDs in parallel.
 
 Future revisions of this library may support:
 
 * Ability to act as an SNMP agent, responding to external queries.
-* Ability to send/receive SNMP traps
 
 There are no plans to support SNMP v3.
 
@@ -39,7 +38,7 @@ A few definitions:
 A simple SNMP-GET:
 
   EM.run {
-    snmp = SNMP4EM::Manager.new(:host => "192.168.1.1", :version => :SNMPv1)
+    snmp = SNMP4EM::Manager.new(:host => "192.168.1.1")
   
     request = snmp.get([OID_SYSNAME, OID_SYSLOCATION])
   
@@ -104,17 +103,31 @@ A simple SNMP-WALK:
     request = snmp.walk(OID_SYSTEM)
 
     request.callback do |response|
-      if (response[OID_SYSTEM].is_a? Array)
-        response[OID_SYSTEM].each do |vb|
-          puts "#{vb[0]} = #{vb[1]}"
-        end
-      else
-        puts "Got error: #{response[OID_SYSTEM]}"
+      response[OID_SYSTEM].each do |oid, value|
+        puts "#{oid} = #{value}"
       end
     end
 
     request.errback do |error|
       puts "WALK got error #{error}"
+    end
+  }
+
+A simple SNMP-BULKWALK:
+
+  EM.run {
+    snmp = SNMP4EM::Manager.new(:host => "192.168.1.1")
+
+    request = snmp.bulkwalk(OID_SYSTEM)
+
+    request.callback do |response|
+      response[OID_SYSTEM].each do |oid, value|
+        puts "#{oid} = #{value}"
+      end
+    end
+
+    request.errback do |error|
+      puts "BULK-WALK got error #{error}"
     end
   }
 
@@ -126,12 +139,8 @@ A simple SNMP-GET-BULK:
     request = snmp.getbulk(OID_SYSTEM)
 
     request.callback do |response|
-      if (response[OID_SYSTEM].is_a? Array)
-        response[OID_SYSTEM].each do |vb|
-          puts "#{vb[0]} = #{vb[1]}"
-        end
-      else
-        puts "Got error: #{response[OID_SYSTEM]}"
+      response[OID_SYSTEM].each do |oid, value|
+        puts "#{oid} = #{value}"
       end
     end
 
@@ -141,6 +150,14 @@ A simple SNMP-GET-BULK:
   }
 
 == Change Log
+
+Version 1.0.0:
+
+* Added SNMPv2 BULKWALK support
+* Added ability to receive SNMP traps / informs
+* Added functional tests (finally!)
+* Moved documentation to Yard
+* Lots of code cleanup
 
 Version 0.2.1:
 
