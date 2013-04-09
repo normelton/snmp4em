@@ -12,7 +12,7 @@ describe "When performing a single SNMPv2 SET request" do
     @snmp_v2.set({"1.9.9.3.3" => "New Value"}).expect do |response|
       response.should have(1).item
       response["1.9.9.3.3"].should be_a(SNMP::ResponseError)
-      response["1.9.9.3.3"].to_s.should == "notWritable"
+      response["1.9.9.3.3"].error_status.should == :notWritable
     end
   end
 end
@@ -31,7 +31,7 @@ describe "When performing multiple SNMPv2 SET requests simultaneously" do
       response.should have(2).items
       response["1.9.9.3.1"].should == true
       response["1.9.9.3.3"].should be_a(SNMP::ResponseError)
-      response["1.9.9.3.3"].to_s.should == "notWritable"
+      response["1.9.9.3.3"].error_status.should == :notWritable
     end
   end
 end

@@ -11,7 +11,8 @@ describe "When performing a single SNMPv2 GET request" do
   it "should return SNMP::NoSuchObject if the value does not exist" do
     @snmp_v2.get("1.9.9.1.5").expect do |response|
       response.should have(1).item
-      response["1.9.9.1.5"].should == SNMP::NoSuchObject
+      response["1.9.9.1.5"].should be_a(SNMP::ResponseError)
+      response["1.9.9.1.5"].error_status.should == :noSuchObject
     end
   end
 end
@@ -29,7 +30,8 @@ describe "When performing multiple SNMPv2 GET requests simultaneously" do
     @snmp_v2.get(["1.9.9.1.1", "1.9.9.1.5"]).expect do |response|
       response.should have(2).items
       response["1.9.9.1.1"].should == "AAA"
-      response["1.9.9.1.5"].should == SNMP::NoSuchObject
+      response["1.9.9.1.5"].should be_a(SNMP::ResponseError)
+      response["1.9.9.1.5"].error_status.should == :noSuchObject
     end
   end
 end

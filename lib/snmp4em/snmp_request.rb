@@ -25,7 +25,13 @@ module SNMP4EM
     end
 
     def format_value vb
-      @return_raw || !vb.value.respond_to?(:rubify) ? vb.value : vb.value.rubify
+      if [SNMP::EndOfMibView, SNMP::NoSuchObject, SNMP::NoSuchInstance].include? vb.value
+        SNMP::ResponseError.new(vb.value)
+      elsif @return_raw || !vb.value.respond_to?(:rubify)
+        vb.value
+      else
+        vb.value.rubify
+      end
     end
 
     def format_outgoing_value value
