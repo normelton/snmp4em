@@ -15,7 +15,14 @@ module SNMP4EM
       
       if response.error_status == :noError
         pending_oids.zip(response.varbind_list).each do |oid, response_vb|
-          oid[:response] = [response_vb.name.to_s, format_value(response_vb)]
+          value = format_value(response_vb)
+
+          if value.is_a? SNMP::ResponseError
+            oid[:response] = value
+          else
+            oid[:response] = [response_vb.name.to_s, format_value(response_vb)]
+          end
+
           oid[:state] = :complete
         end
 
