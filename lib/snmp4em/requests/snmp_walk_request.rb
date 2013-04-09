@@ -22,6 +22,7 @@ module SNMP4EM
           response_oid = response_vb.name
 
           if response_vb.value == SNMP::EndOfMibView
+            # For SNMPv2, this indicates we've reached the end of the MIB
             oid[:state] = :complete
           elsif ! response_oid.subtree_of?(oid[:requested_oid])
             oid[:state] = :complete
@@ -30,6 +31,12 @@ module SNMP4EM
             oid[:next_oid] = response_oid
           end
         end
+
+      elsif response.error_status == :noSuchName
+        # For SNMPv1, this indicates we've reached the end of the MIB
+        error_oid = pending_oids[response.error_index - 1]
+        error_oid[:state] = :complete
+
       else
         error_oid = pending_oids[response.error_index - 1]
         error_oid[:state] = :error
