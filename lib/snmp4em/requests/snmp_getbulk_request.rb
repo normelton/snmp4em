@@ -32,13 +32,13 @@ module SNMP4EM
 
         pending_non_repeating_oids.each do |oid|
           response_vb = vb_list.shift
-          oid[:responses][response_vb.name] = format_value(response_vb)
+          oid[:responses][response_vb.name.to_s] = format_value(response_vb)
           oid[:state] = :complete
         end
 
         while response_vb = vb_list.shift
           oid = pending_repeating_oids[vb_index % pending_repeating_oids.count]
-          oid[:responses][response_vb.name] = format_value(response_vb)
+          oid[:responses][response_vb.name.to_s] = format_value(response_vb) unless response_vb.value == SNMP::EndOfMibView
           oid[:state] = :complete
           vb_index += 1
         end
@@ -76,8 +76,6 @@ module SNMP4EM
       request.non_repeaters = pending_oids.select{|oid| oid[:method] == :non_repeating}.count
       
       message = SNMP::Message.new(@sender.version, @sender.community_ro, request)
-
-      PP.pp request
 
       super(message)
     end
