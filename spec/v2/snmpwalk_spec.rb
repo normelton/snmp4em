@@ -75,7 +75,7 @@ describe "When performing multiple SNMPv2 WALK requests simultaneously" do
   end
 
   it "should fetch two values correctly if one ends before the other" do
-    @snmp_v1.walk(["1.9.9.4.1", "1.9.9.4.3"]).expect do |response|
+    @snmp_v2.walk(["1.9.9.4.1", "1.9.9.4.3"]).expect do |response|
       response.should have(2).items
 
       response["1.9.9.4.1"].should == {

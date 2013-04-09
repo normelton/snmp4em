@@ -21,5 +21,9 @@ module SNMP4EM
     def getbulk(oids, args = {})
       SnmpGetBulkRequest.new(self, oids, args.merge(:version => @version))
     end
+
+    def bulkwalk(oids, args = {})
+      SnmpBulkWalkRequest.new(self, oids, args.merge(:version => @version))
+    end
   end
 end
