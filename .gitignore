@@ -1,4 +1,5 @@
 pkg
 doc
-.rvmrc
 Gemfile.lock
+.rvmrc
+.yardoc

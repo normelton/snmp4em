@@ -1,6 +1,6 @@
-module SNMP #:nodoc:
+module SNMP
 
-  class IpAddress #:nodoc:
+  class IpAddress  # @private
     alias :rubify :to_s
   end
 

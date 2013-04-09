@@ -1,23 +1,26 @@
 module SNMP4EM
 
-  # Returned from SNMP4EM::SNMPv1.set(). This implements EM::Deferrable, so you can hang a callback()
-  # or errback() to retrieve the results.
+  # The result of calling {SNMPCommonRequests#set}.
 
   class SnmpSetRequest < SnmpRequest
     attr_accessor :snmp_id
 
-    # For an SNMP-SET request, @pending_varbinds will by an SNMP::VarBindList, initially populated from the
-    # provided oids hash. Variables can be passed as specific types from the SNMP library (i.e. SNMP::IpAddress)
-    # or as ruby native objects, in which case they will be cast into the appropriate SNMP object. As responses
-    # are returned, the @pending_varbinds object will be pruned of any error-producing varbinds. Once no errors
-    # are produced, the @responses object is populated and returned.
+    # Used to register a callback that is triggered when the query result is ready. The resulting object is passed as a parameter to the block.
+    def callback &block
+      super
+    end
 
-    def initialize(sender, oids, args = {}) #:nodoc:
+    # Used to register a callback that is triggered when query fails to complete successfully.
+    def errback &block
+      super
+    end
+
+    def initialize(sender, oids, args = {})  # @private
       @oids = [*oids].collect { |oid_str, value| { :requested_oid => SNMP::ObjectId.new(oid_str), :requested_string => oid_str, :value => format_outgoing_value(value), :state => :pending, :response => nil }}
       super
     end
     
-    def handle_response(response) #:nodoc:
+    def handle_response(response)  # @private
       super
       
       if (response.error_status == :noError)

@@ -1,6 +1,6 @@
-module SNMP #:nodoc:
+module SNMP
 
-  class OctetString #:nodoc:
+  class OctetString   # @private
     alias :rubify :to_s
   end
 

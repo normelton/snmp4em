@@ -1,6 +1,6 @@
-module SNMP #:nodoc:
+module SNMP
 
-  class Integer #:nodoc:
+  class Integer  # @private
     alias :rubify :to_i
   end
 

@@ -1,5 +1,5 @@
 module SNMP4EM
-  class Handler < EventMachine::Connection #:nodoc:
+  class Handler < EventMachine::Connection  # @private
     def receive_data(data)
       begin
         message = SNMP::Message.decode(data)

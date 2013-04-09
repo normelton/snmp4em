@@ -20,5 +20,6 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'snmp', '>= 1.0.2'
   s.add_runtime_dependency 'eventmachine', '>= 1.0.0'
   s.add_development_dependency 'rspec'
+  s.add_development_dependency 'yard'
   
 end

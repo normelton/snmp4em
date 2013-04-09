@@ -1,10 +1,11 @@
-module SNMP #:nodoc:
+module SNMP
 
   class ResponseError
     attr_reader :error_status
-    alias :rubify :error_status #:nodoc:
+    alias :rubify :error_status
     
-    def initialize(error) #:nodoc:
+    # Accepts either a string (from SNMP::PDU.error_status) or one of SNMP::EndOfMibView, SNMP::NoSuchObject, or SNMP::NoSuchInstance
+    def initialize(error)
       if [SNMP::EndOfMibView, SNMP::NoSuchObject, SNMP::NoSuchInstance].include? error
         @error_status = error.asn1_type.to_sym
       else

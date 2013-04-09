@@ -1,20 +1,25 @@
 module SNMP4EM
 
-  # This implements EM::Deferrable, so you can hang a callback() or errback() to retrieve the results.
+  # The result of calling {SNMPv2cRequests#bulkwalk}.
 
   class SnmpBulkWalkRequest < SnmpRequest
     attr_accessor :snmp_id
 
-    # SNMP-BULKWALK is faked using GETBULK queries until the returned OID isn't a subtree of the walk OID.
-    #
-    # Note that this library supports walking multiple base OIDs in parallel, and that the walk fails
-    # atomically with a list of OIDS that failed to gather.
+    # Used to register a callback that is triggered when the query result is ready. The resulting object is passed as a parameter to the block.
+    def callback &block
+      super
+    end
 
-    def on_init args
+    # Used to register a callback that is triggered when query fails to complete successfully.
+    def errback &block
+      super
+    end
+
+    def on_init args  # @private
       @oids.each{|oid| oid.merge!({:next_oid => oid[:requested_oid], :responses => {}})}
     end
 
-    def handle_response(response) #:nodoc:
+    def handle_response(response)  # @private
       super
 
       if response.error_status == :noError

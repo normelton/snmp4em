@@ -1,6 +1,6 @@
-module SNMP #:nodoc:
+module SNMP
 
-  class Null #:nodoc:
+  class Null  # @private
     class << self
       def rubify
         nil

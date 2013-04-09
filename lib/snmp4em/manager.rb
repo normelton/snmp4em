@@ -1,10 +1,14 @@
 # The SNMP4EM library 
 
 module SNMP4EM
+  # Provides access to send and receive SNMP messages via a UDP socket.
+  #
+  # _Note_ - The methods for actually sending requests are documented in {SNMP4EM::SNMPCommonRequests} and, for
+  # those specific to SNMPv2, {SNMP4EM::SNMPv2cRequests}.
   class Manager
     include SNMP4EM::SNMPCommonRequests
 
-    MAX_INDEX = 2**31  # Largest SNMP Signed INTEGER
+    MAX_INDEX = 2**31  # @private Largest SNMP Signed INTEGER 
 
     #
     # @pending_requests maps a request's id to its SnmpRequest
@@ -16,8 +20,8 @@ module SNMP4EM
       attr_reader :pending_requests
       attr_reader :socket
       
-      def init_socket #:nodoc:
-        # When the socket is in error state, close the socket and re-open a new one.
+      # Initializes the outgoing socket. Checks to see if it's in an error state, and if so closes and reopens the socket
+      def init_socket
         if !@socket.nil? && @socket.error?
           @socket.close_connection
           @socket = nil
@@ -27,6 +31,7 @@ module SNMP4EM
         @socket ||= EM::open_datagram_socket("0.0.0.0", 0, Handler)
       end
 
+      # Assigns an SNMP ID to an outgoing request so that it can be matched with its incoming response
       def track_request(request)
         @pending_requests.delete(request.snmp_id)
 
@@ -41,14 +46,15 @@ module SNMP4EM
     
     attr_reader :host, :port, :timeout, :retries, :version, :community_ro, :community_rw
     
-    # Creates a new object to communicate with SNMPv1 agents. Optionally pass in the following parameters:
+    # Creates a new object to communicate with SNMP agents. Optionally pass in the following parameters:
     # *  _host_ - IP/hostname of remote agent (default: 127.0.0.1)
     # *  _port_ - UDP port on remote agent (default: 161)
-    # *  _community_ - Community string to use (default: public)
-    # *  _community_ro_ - Read-only community string to use for get/getnext/walk operations (default: public)
-    # *  _community_rw_ - Read-write community string to use for set operations (default: public)
+    # *  _community_ - Community string to use for all operations (default: public)
+    # *  _community_ro_ - Read-only community string to use for read-only operations (default: public)
+    # *  _community_rw_ - Read-write community string to use for read-write operations (default: public)
     # *  _timeout_ - Number of seconds to wait before a request times out (default: 1)
     # *  _retries_ - Number of retries before failing (default: 3)
+    # *  _version_ - SNMP version, either :SNMPv1 or :SNMPv2c (default: :SNMPv2c)
     
     def initialize(args = {})
       @host    = args[:host]    || "127.0.0.1"
@@ -65,7 +71,7 @@ module SNMP4EM
       self.class.init_socket
     end
     
-    def send(message) #:nodoc:
+    def send(message) # @private
       self.class.socket.send_datagram message.encode, @host, @port
     end
 

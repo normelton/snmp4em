@@ -1,5 +1,5 @@
 module SNMP4EM
-  class NotificationHandler < EventMachine::Connection #:nodoc:
+  class NotificationHandler < EventMachine::Connection  # @private
     attr_accessor :callbacks
 
     def post_init

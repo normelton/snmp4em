@@ -1,10 +1,10 @@
 module SNMP4EM
-  class SnmpRequest #:nodoc:
+  class SnmpRequest
     include EM::Deferrable
 
     attr_accessor :timeout_timer
 
-    def initialize(sender, oids, args = {}) #:nodoc:
+    def initialize(sender, oids, args = {})
       @sender = sender
       
       @oids ||= [*oids].collect { |oid_str| { :requested_string => oid_str, :requested_oid => SNMP::ObjectId.new(oid_str), :state => :pending }}
@@ -20,11 +20,11 @@ module SNMP4EM
       send
     end
 
-    def pending_oids
+    def pending_oids  # @private
       @oids.select{|oid| oid[:state] == :pending}
     end
 
-    def format_value vb
+    def format_value vb  # @private
       if [SNMP::EndOfMibView, SNMP::NoSuchObject, SNMP::NoSuchInstance].include? vb.value
         SNMP::ResponseError.new(vb.value)
       elsif @return_raw || !vb.value.respond_to?(:rubify)
@@ -34,7 +34,7 @@ module SNMP4EM
       end
     end
 
-    def format_outgoing_value value
+    def format_outgoing_value value  # @private
       if value.is_a? Integer
         return SNMP::Integer.new(value)
       elsif value.is_a? String
@@ -44,7 +44,7 @@ module SNMP4EM
       end
     end
     
-    def init_callbacks
+    def init_callbacks  # @private
       self.callback do
         Manager.pending_requests.delete(@snmp_id)
       end
@@ -55,7 +55,7 @@ module SNMP4EM
       end
     end
 
-    def send(msg)
+    def send(msg)  # @private
       @sender.send msg
 
       @timeout_timer.cancel if @timeout_timer.is_a?(EM::Timer)
@@ -70,7 +70,7 @@ module SNMP4EM
       end
     end
 
-    def handle_response response
+    def handle_response response  # @private
       @timeout_timer.cancel
     end
   end

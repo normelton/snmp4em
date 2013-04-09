@@ -1,15 +1,21 @@
 module SNMP4EM
   
-  # This implements EM::Deferrable, so you can hang a callback() or errback() to retrieve the results.
+  # The result of calling {SNMPCommonRequests#get}.
 
   class SnmpGetRequest < SnmpRequest
     attr_accessor :snmp_id
 
-    # For an SNMP-GET request, @pending_oids will be a ruby array of SNMP::ObjectNames that need to be fetched. As
-    # responses come back from the agent, this array will be pruned of any error-producing OIDs. Once no errors
-    # are returned, the @responses hash will be populated and returned.
+    # Used to register a callback that is triggered when the query result is ready. The resulting object is passed as a parameter to the block.
+    def callback &block
+      super
+    end
 
-    def handle_response(response) #:nodoc:
+    # Used to register a callback that is triggered when query fails to complete successfully.
+    def errback &block
+      super
+    end
+
+    def handle_response(response)  # @private
       super
       
       if response.error_status == :noError
