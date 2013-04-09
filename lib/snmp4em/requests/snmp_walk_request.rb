@@ -10,22 +10,24 @@ module SNMP4EM
     # Note that this library supports walking multiple base OIDs in parallel, and that the walk fails
     # atomically with a list of OIDS that failed to gather.
 
-    def on_init
+    def on_init args
       @oids.each{|oid| oid.merge!({:next_oid => oid[:requested_oid], :responses => {}})}
     end
 
     def handle_response(response) #:nodoc:
       super
-      
+
       if response.error_status == :noError
         pending_oids.zip(response.varbind_list).each do |oid, response_vb|
           response_oid = response_vb.name
 
-          if response_oid.subtree_of?(oid[:requested_oid])
-            oid[:responses][response_oid] = format_value(response_vb)
-            oid[:next_oid] = response_oid
-          else
+          if response_vb.value == SNMP::EndOfMibView
             oid[:state] = :complete
+          elsif ! response_oid.subtree_of?(oid[:requested_oid])
+            oid[:state] = :complete
+          else
+            oid[:responses][response_oid.to_s] = format_value(response_vb)
+            oid[:next_oid] = response_oid
           end
         end
       else
