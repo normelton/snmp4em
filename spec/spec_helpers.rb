@@ -17,6 +17,10 @@ RSpec.configure do |config|
         fail error
       end
 
+      EventMachine::Timer.new(3) do
+        fail "Timeout"
+      end
+
       @snmp_v1 = SNMP4EM::Manager.new(:port => 1620, :community_ro => "public", :community_rw => "private", :version => :SNMPv1)
       @snmp_v2 = SNMP4EM::Manager.new(:port => 1620, :community_ro => "public", :community_rw => "private", :version => :SNMPv2c)
       spec.run
