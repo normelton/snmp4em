@@ -25,6 +25,11 @@ There are no plans to support SNMP v3.
 Version 1.0.0 tweaks the return values of a few functions. Please test code thoroughly before upgrading to 1.0.0 in production!
 
 
+== Running tests
+
+This library now includes a full suite of functional tests. They communicate with an SNMP daemon running on the localhost. The library comes with the necessary configuration, but it's much easier to fire up the provided rake task (`rake server`), running in a separate terminal window, before running `rspec`. This works fine on a Mac OS X machine using homebrew (`brew install net-snmp`).
+
+
 == Acknowledgements
 
 * The SNMP packet processing is handled by the Ruby-SNMP[http://snmplib.rubyforge.org] library, by David Halliday
