@@ -20,6 +20,11 @@ Future revisions of this library may support:
 There are no plans to support SNMP v3.
 
 
+== Backwards compatibility
+
+Version 1.0.0 tweaks the return values of a few functions. Please test code thoroughly before upgrading to 1.0.0 in production!
+
+
 == Acknowledgements
 
 * The SNMP packet processing is handled by the Ruby-SNMP[http://snmplib.rubyforge.org] library, by David Halliday
@@ -148,6 +153,7 @@ A simple SNMP-GET-BULK:
       puts "GET-BULK got error #{error}"
     end
   }
+
 
 == Change Log
 
