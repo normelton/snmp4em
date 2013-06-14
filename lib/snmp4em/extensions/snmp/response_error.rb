@@ -2,7 +2,6 @@ module SNMP
 
   class ResponseError
     attr_reader :error_status
-    alias :rubify :error_status
     
     # Accepts either a string (from SNMP::PDU.error_status) or one of SNMP::EndOfMibView, SNMP::NoSuchObject, or SNMP::NoSuchInstance
     def initialize(error)
@@ -17,6 +16,9 @@ module SNMP
     def to_s
       @error_status.to_s
     end
-  end
 
+    def rubify
+      return nil
+    end
+  end
 end

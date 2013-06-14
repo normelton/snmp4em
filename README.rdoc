@@ -162,6 +162,10 @@ A simple SNMP-GET-BULK:
 
 == Change Log
 
+Version 1.0.1:
+
+* Requests resulting in an error now return nil unless return_raw is enabled
+
 Version 1.0.0:
 
 * Added SNMPv2 BULKWALK support
