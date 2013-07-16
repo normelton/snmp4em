@@ -66,7 +66,9 @@ module SNMP4EM
 
       @timeout_timer.cancel if @timeout_timer.is_a?(EM::Timer)
 
-      @timeout_timer = EM::Timer.new(@timeouts.shift) do
+      @timeout_timer = EM::Timer.new(@timeouts.first) do
+        @timeouts.shift
+        
         if @timeouts.empty?
           fail "exhausted all timeout retries"
         else
