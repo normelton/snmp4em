@@ -49,12 +49,12 @@ module SNMP4EM
         return
       end
     
-      send
+      send_msg
     end
 
     private
     
-    def send
+    def send_msg
       Manager.track_request(self)
 
       query_oids = @oids.select{|oid| oid[:state] == :pending}.collect{|oid| oid[:requested_oid]}

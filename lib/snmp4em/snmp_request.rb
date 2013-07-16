@@ -23,7 +23,7 @@ module SNMP4EM
       
       init_callbacks
       on_init(args) if respond_to?(:on_init)
-      send
+      send_msg
     end
 
     def pending_oids  # @private
@@ -61,8 +61,8 @@ module SNMP4EM
       end
     end
 
-    def send(msg)  # @private
-      @sender.send msg
+    def send_msg(msg)  # @private
+      @sender.send_msg msg
 
       @timeout_timer.cancel if @timeout_timer.is_a?(EM::Timer)
 
@@ -70,7 +70,7 @@ module SNMP4EM
         if @timeouts.empty?
           fail "exhausted all timeout retries"
         else
-          send
+          send_msg
         end
       end
     end

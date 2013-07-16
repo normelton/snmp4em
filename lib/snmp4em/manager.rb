@@ -71,7 +71,7 @@ module SNMP4EM
       self.class.init_socket
     end
     
-    def send(message) # @private
+    def send_msg(message) # @private
       self.class.socket.send_datagram message.encode, @host, @port
     end
 

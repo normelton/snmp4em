@@ -47,12 +47,12 @@ module SNMP4EM
         return
       end
     
-      send
+      send_msg
     end
 
     private
     
-    def send
+    def send_msg
       Manager.track_request(self)
 
       pending_varbinds = pending_oids.collect{|oid| SNMP::VarBind.new(oid[:requested_oid], oid[:value])}
