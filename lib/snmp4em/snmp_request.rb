@@ -9,8 +9,14 @@ module SNMP4EM
       
       @oids ||= [*oids].collect { |oid_str| { :requested_string => oid_str, :requested_oid => SNMP::ObjectId.new(oid_str), :state => :pending }}
 
-      @timeout_timer = nil
-      @timeout_retries = args[:retries] || @sender.retries
+      retries = args[:retries] || @sender.retries
+      timeout = args[:timeout] || @sender.timeout
+
+      if retries.is_a?(Array)
+        @timeouts = retries.clone
+      else
+        @timeouts = (retries + 1).times.collect { timeout }
+      end
       
       @return_raw = args[:return_raw] || false
       @max_results = args[:max_results] || nil
@@ -60,12 +66,11 @@ module SNMP4EM
 
       @timeout_timer.cancel if @timeout_timer.is_a?(EM::Timer)
 
-      @timeout_timer = EM::Timer.new(@sender.timeout) do
-        if @timeout_retries > 0
-          send
-          @timeout_retries -= 1
-        else
+      @timeout_timer = EM::Timer.new(@timeouts.shift) do
+        if @timeouts.empty?
           fail "exhausted all timeout retries"
+        else
+          send
         end
       end
     end

@@ -7,7 +7,7 @@ This gem extends Ruby-SNMP[http://snmplib.rubyforge.org] to use the asynchronous
 
 == Features
 
-Version 1.0.0 supports:
+The library currently supports:
 
 * SNMP v1 and v2 
 * SNMP Get, GetNext, Set, and Walk requests. For SNMPv2 clients, GetBulk and WalkBulk
@@ -17,7 +17,32 @@ Future revisions of this library may support:
 
 * Ability to act as an SNMP agent, responding to external queries.
 
-There are no plans to support SNMP v3.
+There are no plans to support SNMP v3 or the parsing of MIB files.
+
+
+== Options
+
+You may set the following options:
+
+``` ruby
+SNMP4EM::Manager.new(
+  :version => :SNMPv2c,
+  :host => "127.0.0.1",
+  :port => 161,
+  :community => "public",      # Shorthand for setting both :community_ro and :community_rw
+  :community_ro => "public",
+  :community_rw => "public",
+  :timeout => 1,
+  :retries => 3                # Can also be specified as an array of individual timeouts
+                               # For instance, [0.5, 1, 2.5] would send three requests with increasing timeout values
+)
+```
+
+These options may also be passed to an individual query method, for instance:
+
+``` ruby
+snmp = SNMP4EM::Manager.new(...)
+snmp.get(OID, :retries => 2, :timeout => 1)
 
 
 == Backwards compatibility
@@ -161,6 +186,10 @@ A simple SNMP-GET-BULK:
 
 
 == Change Log
+
+Version 1.0.2:
+
+* Ability to specify timeouts as an array of timeout values. Inspired by https://github.com/calmh/node-snmp-native.
 
 Version 1.0.1:
 
