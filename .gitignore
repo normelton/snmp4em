@@ -3,5 +3,5 @@ doc
 Gemfile.lock
 .rvmrc
 .yardoc
-
+.ruby-*
 snmp4em-*.gem
