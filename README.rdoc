@@ -41,6 +41,13 @@ These options may also be passed to an individual query method, for instance:
   snmp = SNMP4EM::Manager.new(...)
   snmp.get(OID, :retries => 2, :timeout => 1)
 
+And when receiving traps:
+
+  SNMP4EM::NotificationManager.new(
+    :host => "127.0.0.1",        # Local interface on which to listen for traps. By default, localhost only!
+    :port => 161                 # Port on which to listen for traps.
+  )
+
 
 == Backwards compatibility
 
@@ -178,6 +185,20 @@ A simple SNMP-GET-BULK:
 
     request.errback do |error|
       puts "GET-BULK got error #{error}"
+    end
+  }
+
+Handling traps:
+
+  EM.run {
+    manager = SNMP4EM::NotificationManager.new
+
+    manager.on_trap do |trap|
+      if trap.is_a? SNMP::SNMPv1_Trap
+        puts "Got a SNMPv1_Trap"
+      elsif trap.is_a? SNMP::SNMPv2_Trap
+        puts "Got a SNMPv2_Trap"
+      end
     end
   }
 
