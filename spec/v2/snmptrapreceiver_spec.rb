@@ -5,8 +5,8 @@ describe "When receiving an SNMPv1 trap" do
     manager = SNMP4EM::NotificationManager.new(:port => 1621)
 
     manager.on_trap do |trap|
-      trap.should be_a(SNMP::SNMPv2_Trap)
-      trap.trap_oid.to_s.should == "1.2.3"
+      expect(trap).to be_a(SNMP::SNMPv2_Trap)
+      expect(trap.trap_oid.to_s).to eq("1.2.3")
 
       EM.stop
     end

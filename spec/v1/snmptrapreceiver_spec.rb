@@ -5,10 +5,10 @@ describe "When receiving an SNMPv1 trap" do
     manager = SNMP4EM::NotificationManager.new(:port => 1621)
 
     manager.on_trap do |trap|
-      trap.should be_a(SNMP::SNMPv1_Trap)
-      trap.enterprise.to_s.should == "1.2.3"
-      trap.generic_trap.should == :linkUp
-      trap.specific_trap.should == 0
+      expect(trap).to be_a(SNMP::SNMPv1_Trap)
+      expect(trap.enterprise.to_s).to eq("1.2.3")
+      expect(trap.generic_trap).to eq(:linkUp)
+      expect(trap.specific_trap).to eq(0)
 
       EM.stop
     end
