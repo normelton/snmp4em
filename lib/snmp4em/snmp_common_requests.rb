@@ -11,7 +11,8 @@ module SNMP4EM
     # *  _version_ - Override the version provided in the {SNMP4EM::Manager} constructor
  
     def get(oids, args = {})
-      SnmpGetRequest.new(self, oids, args.merge(:version => @version))
+      request = SnmpGetRequest.new(self, oids, args.merge(:version => @version))
+      if (@fiber || args[:fiber]) then wrap_in_fiber(request) else request end
     end
 
     # Sends an SNMP-GETNEXT request to the remote agent for all OIDs specified in the _oids_ array. Returns a {SnmpGetRequest} object,
@@ -24,7 +25,8 @@ module SNMP4EM
     # *  _version_ - Override the version provided in the {SNMP4EM::Manager} constructor
 
     def getnext(oids, args = {})
-      SnmpGetNextRequest.new(self, oids, args.merge(:version => @version))
+      request = SnmpGetNextRequest.new(self, oids, args.merge(:version => @version))
+      if (@fiber || args[:fiber]) then wrap_in_fiber(request) else request end
     end
 
     # Sends an SNMP-SET request to the remote agent for all OIDs specified in the _oids_ hash. The hash must map OID values to requested
@@ -37,7 +39,8 @@ module SNMP4EM
     # *  _version_ - Override the version provided in the {SNMP4EM::Manager} constructor
 
     def set(oids, args = {})
-      SnmpSetRequest.new(self, oids, args.merge(:version => @version))
+      request = SnmpSetRequest.new(self, oids, args.merge(:version => @version))
+      if (@fiber || args[:fiber]) then wrap_in_fiber(request) else request end
     end
 
     # Sends a series of SNMP-GETNEXT requests to simulate an SNMP "walk" operation. Given an OID prefix, the library will keep requesting the
@@ -53,7 +56,8 @@ module SNMP4EM
     # *  _version_ - Override the version provided in the {SNMP4EM::Manager} constructor
 
     def walk(oids, args = {})
-      SnmpWalkRequest.new(self, oids, args.merge(:version => @version))
+      request = SnmpWalkRequest.new(self, oids, args.merge(:version => @version))
+      if (@fiber || args[:fiber]) then wrap_in_fiber(request) else request end
     end
   end
 end

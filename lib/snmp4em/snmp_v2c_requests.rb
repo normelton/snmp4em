@@ -19,7 +19,8 @@ module SNMP4EM
     # *  _maxrepetitions_ - Number of OID-value pairs to be returned for each OID (default is 10)
 
     def getbulk(oids, args = {})
-      SnmpGetBulkRequest.new(self, oids, args)
+      request = SnmpGetBulkRequest.new(self, oids, args)
+      if (@fiber || args[:fiber]) then wrap_in_fiber(request) else request end
     end
 
     # Uses SNMPv2 GET-BULK operations to fetch all values of one or more OID prefixes. This produces the same result as {SNMPCommonRequests#walk}, but with much
@@ -34,7 +35,8 @@ module SNMP4EM
     # *  _version_ - Override the version provided in the {SNMP4EM::Manager} constructor
 
     def bulkwalk(oids, args = {})
-      SnmpBulkWalkRequest.new(self, oids, args)
+      request = SnmpBulkWalkRequest.new(self, oids, args)
+      if (@fiber || args[:fiber]) then wrap_in_fiber(request) else request end
     end
   end
 end

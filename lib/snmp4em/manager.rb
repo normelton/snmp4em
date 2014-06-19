@@ -62,6 +62,7 @@ module SNMP4EM
       @timeout = args[:timeout] || 1
       @retries = args[:retries] || 3
       @version = args[:version] || :SNMPv2c
+      @fiber   = args[:fiber]   || false
 
       self.extend SNMPv2cRequests if @version == :SNMPv2c
 
@@ -73,6 +74,22 @@ module SNMP4EM
     
     def send_msg(message) # @private
       self.class.socket.send_datagram message.encode, @host, @port
+    end
+
+    def wrap_in_fiber(request) # @private
+      require "fiber"
+
+      fiber = Fiber.current
+
+      request.callback do |response|
+        fiber.resume response
+      end
+
+      request.errback do |error|
+        fiber.resume StandardError.new(error)
+      end
+
+      Fiber.yield
     end
 
   end
