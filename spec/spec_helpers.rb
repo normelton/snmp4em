@@ -25,6 +25,7 @@ RSpec.configure do |config|
       @snmp_v2 = SNMP4EM::Manager.new(:port => 1620, :community_ro => "public", :community_rw => "private", :version => :SNMPv2c)
 
       @snmp_v1_fiber = SNMP4EM::Manager.new(:port => 1620, :community_ro => "public", :community_rw => "private", :version => :SNMPv1, :fiber => true)
+      @snmp_v1_fiber_bogus_port = SNMP4EM::Manager.new(:port => 1621, :community_ro => "public", :community_rw => "private", :version => :SNMPv1, :fiber => true)
 
       spec.run
     end
