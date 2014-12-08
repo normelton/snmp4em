@@ -86,7 +86,7 @@ module SNMP4EM
       end
 
       request.errback do |error|
-        fiber.resume StandardError.new(error)
+        fiber.resume SNMP::RequestTimeout.new(error)
       end
 
       Fiber.yield

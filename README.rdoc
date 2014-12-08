@@ -206,7 +206,7 @@ Handling traps:
 
 == Fiber Support
 
-If your Ruby supports it, you can pass enable fibers, either per-manager or per-request. This unwinds much of the complexity in writing event-driven code. Instead of receiving an object on which to hang callbacks, the current fiber will be suspended until the response is available. If an error occurs, it will be returned as a StandardError. Unfortunately, there is no way to raise this error, you are responsible for manually checking whether the returned object is an error or not.
+If your Ruby supports it, you can pass enable fibers, either per-manager or per-request. This unwinds much of the complexity in writing event-driven code. Instead of receiving an object on which to hang callbacks, the current fiber will be suspended until the response is available. If an error occurs, it will be returned as a SNMP::RequestTimeout. Unfortunately, there is no way to raise this error, you are responsible for manually checking whether the returned object is an error or not.
 
 For example:
 
@@ -216,7 +216,7 @@ For example:
     f = Fiber.new do
       response = snmp.get([OID_SYSNAME, OID_SYSLOCATION])
   
-      if response.is_a? StandardError
+      if response.is_a? SNMP::RequestTimeout
         puts "Uh oh!"
       else
         puts "System name = #{response[OID_SYSNAME]}"
