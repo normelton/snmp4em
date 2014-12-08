@@ -227,6 +227,10 @@ For example:
 
 == Change Log
 
+Version 1.1.2:
+
+* Changed timeout error handling. We now raise a SNMP::RequestTimeout instead of a StandardError.
+
 Version 1.1.0:
 
 * Fiber support
