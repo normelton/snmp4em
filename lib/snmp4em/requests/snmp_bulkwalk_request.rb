@@ -33,7 +33,7 @@ module SNMP4EM
 
           next unless oid[:state] == :pending
 
-          if response_vb.value == SNMP::EndOfMibView
+          if response_vb.value.is_a? SNMP::EndOfMibView
             oid[:state] = :complete
 
           elsif ! response_oid.subtree_of?(oid[:requested_oid])
@@ -68,13 +68,13 @@ module SNMP4EM
     end
 
     private
-    
+
     def send_msg
       Manager.track_request(self)
 
       vb_list = SNMP::VarBindList.new(pending_oids.collect{|oid| oid[:next_oid]})
       request = SNMP::GetBulkRequest.new(@snmp_id, vb_list)
-      
+
       request.max_repetitions = 10
       request.non_repeaters = 0
 
@@ -82,5 +82,5 @@ module SNMP4EM
 
       super(message)
     end
-  end  
+  end
 end
