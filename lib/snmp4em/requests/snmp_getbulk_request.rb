@@ -1,5 +1,5 @@
 module SNMP4EM
-  
+
   # The result of calling {SNMPv2Requests#getbulk}.
 
   class SnmpGetBulkRequest < SnmpRequest
@@ -23,10 +23,10 @@ module SNMP4EM
 
       @max_results ||= 10
     end
-    
+
     def handle_response(response)  # @private
       super
-      
+
       pending_repeating_oids = pending_oids.select{|oid| oid[:method] == :repeating}
       pending_non_repeating_oids = pending_oids.select{|oid| oid[:method] == :non_repeating}
 
@@ -44,17 +44,17 @@ module SNMP4EM
 
         while response_vb = vb_list.shift
           oid = pending_repeating_oids[vb_index % pending_repeating_oids.count]
-          oid[:responses][response_vb.name.to_s] = format_value(response_vb) unless response_vb.value == SNMP::EndOfMibView
+          oid[:responses][response_vb.name.to_s] = format_value(response_vb) unless response_vb.value.is_a? SNMP::EndOfMibView
           oid[:state] = :complete
           vb_index += 1
         end
-        
+
       else
         error_oid = pending_oids[response.error_index - 1]
         error_oid[:state] = :error
         error_oid[:error] = SNMP::ResponseError.new(response.error_status)
       end
-      
+
       if pending_oids.empty?
         result = {}
 
@@ -77,13 +77,13 @@ module SNMP4EM
 
       vb_list = SNMP::VarBindList.new(pending_oids.collect{|oid| oid[:requested_oid]})
       request = SNMP::GetBulkRequest.new(@snmp_id, vb_list)
-      
+
       request.max_repetitions = @max_results
       request.non_repeaters = pending_oids.select{|oid| oid[:method] == :non_repeating}.count
-      
+
       message = SNMP::Message.new(@sender.version, @sender.community_ro, request)
 
       super(message)
     end
-  end  
+  end
 end

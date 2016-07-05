@@ -26,7 +26,7 @@ module SNMP4EM
         pending_oids.zip(response.varbind_list).each do |oid, response_vb|
           response_oid = response_vb.name
 
-          if response_vb.value == SNMP::EndOfMibView
+          if response_vb.value.is_a? SNMP::EndOfMibView
             # For SNMPv2, this indicates we've reached the end of the MIB
             oid[:state] = :complete
           elsif ! response_oid.subtree_of?(oid[:requested_oid])
@@ -64,7 +64,7 @@ module SNMP4EM
     end
 
     private
-    
+
     def send_msg
       Manager.track_request(self)
 
@@ -74,5 +74,5 @@ module SNMP4EM
 
       super(message)
     end
-  end  
+  end
 end
