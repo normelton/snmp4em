@@ -11,7 +11,7 @@ describe "When performing a single SNMPv2 BULKWALK request" do
   it "should fetch the correct value when walking an OID keyed by multiple values" do
     @snmp_v2.bulkwalk("1.9.9.5").expect do |response|
       expect(response.size).to eq(1)
-      expect(response["1.9.9.5"].size).to eq(52)
+      expect(response["1.9.9.5"].size).to eq(54)
     end
   end
 
@@ -33,6 +33,15 @@ describe "When performing a single SNMPv2 BULKWALK request" do
     @snmp_v2.bulkwalk("1.9.9.5.1.1").expect do |response|
       expect(response.size).to eq(1)
       expect(response["1.9.9.5.1.1"]).to eq({})
+    end
+  end
+end
+
+describe "When walking over a list of integer values" do
+  it "should fetch the correct values" do
+    @snmp_v2.bulkwalk("1.9.9.5.4").expect do |response|
+      expect(response.size).to eq(1)
+      expect(response["1.9.9.5.4"].size).to eq(2)
     end
   end
 end
@@ -62,11 +71,11 @@ describe "When performing multiple SNMPv2 BULKWALK requests simultaneously" do
   end
 
   it "should fetch one value correctly if the other does not exist" do
-    @snmp_v2.bulkwalk(["1.9.9.5.1", "1.9.9.5.4"]).expect do |response|
+    @snmp_v2.bulkwalk(["1.9.9.5.1", "1.9.9.5.6"]).expect do |response|
       expect(response.size).to eq(2)
 
       expect(response["1.9.9.5.1"].size).to eq(24)
-      expect(response["1.9.9.5.4"]).to eq({})
+      expect(response["1.9.9.5.6"]).to eq({})
     end
   end
 end

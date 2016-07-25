@@ -26,7 +26,9 @@ describe "When performing a single SNMPv2 WALK request" do
         "1.9.9.4.2.3" => "2-C",
         "1.9.9.4.2.4" => "2-D",
         "1.9.9.4.3.1" => "3-A",
-        "1.9.9.4.3.2" => "3-B"
+        "1.9.9.4.3.2" => "3-B",
+        "1.9.9.4.4.1" => 1,
+        "1.9.9.4.4.2" => 2
       })
     end
   end
@@ -49,6 +51,15 @@ describe "When performing a single SNMPv2 WALK request" do
     @snmp_v2.walk("1.9.9.4.1.1").expect do |response|
       expect(response.size).to eq(1)
       expect(response["1.9.9.4.1.1"]).to eq({})
+    end
+  end
+end
+
+describe "When walking over a list of integer values" do
+  it "should fetch the correct values" do
+    @snmp_v2.walk("1.9.9.4.4").expect do |response|
+      expect(response.size).to eq(1)
+      expect(response["1.9.9.4.4"].size).to eq(2)
     end
   end
 end
@@ -93,7 +104,7 @@ describe "When performing multiple SNMPv2 WALK requests simultaneously" do
   end
 
   it "should fetch one value correctly if the other does not exist" do
-    @snmp_v2.walk(["1.9.9.4.1", "1.9.9.4.4"]).expect do |response|
+    @snmp_v2.walk(["1.9.9.4.1", "1.9.9.4.6"]).expect do |response|
       expect(response.size).to eq(2)
 
       expect(response["1.9.9.4.1"]).to eq({
@@ -103,7 +114,7 @@ describe "When performing multiple SNMPv2 WALK requests simultaneously" do
         "1.9.9.4.1.4" => "1-D"
       })
 
-      expect(response["1.9.9.4.4"]).to eq({})
+      expect(response["1.9.9.4.6"]).to eq({})
     end
   end
 end

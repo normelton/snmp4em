@@ -26,7 +26,7 @@ module SNMP4EM
         pending_oids.zip(response.varbind_list).each do |oid, response_vb|
           response_oid = response_vb.name
 
-          if response_vb.value == SNMP::EndOfMibView
+          if SNMP::EndOfMibView == response_vb.value
             # For SNMPv2, this indicates we've reached the end of the MIB
             oid[:state] = :complete
           elsif ! response_oid.subtree_of?(oid[:requested_oid])

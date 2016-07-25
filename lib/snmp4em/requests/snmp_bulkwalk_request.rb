@@ -33,7 +33,7 @@ module SNMP4EM
 
           next unless oid[:state] == :pending
 
-          if response_vb.value == SNMP::EndOfMibView
+          if SNMP::EndOfMibView == response_vb.value
             oid[:state] = :complete
 
           elsif ! response_oid.subtree_of?(oid[:requested_oid])
