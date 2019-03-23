@@ -76,11 +76,20 @@ module SNMP4EM
       Manager.track_request(self)
 
       vb_list = SNMP::VarBindList.new(pending_oids.collect{|oid| oid[:requested_oid]})
-      request = SNMP::GetBulkRequest.new(@snmp_id, vb_list)
-      
-      request.max_repetitions = @max_results
-      request.non_repeaters = pending_oids.select{|oid| oid[:method] == :non_repeating}.count
-      
+
+      max_repetitions = @max_results
+      non_repeaters = pending_oids.select{|oid| oid[:method] == :non_repeating}.count
+
+      # Gracefully handle a new constructor introduced in SNMP 1.3.1
+      if Gem::Version.new(SNMP::VERSION) >= Gem::Version.new("1.3.1")
+        request = SNMP::GetBulkRequest.new(@snmp_id, vb_list, non_repeaters, max_repetitions)
+      else
+        request = SNMP::GetBulkRequest.new(@snmp_id, vb_list)
+        
+        request.max_repetitions = max_repetitions
+        request.non_repeaters = non_repeaters
+      end
+
       message = SNMP::Message.new(@sender.version, @sender.community_ro, request)
 
       super(message)
