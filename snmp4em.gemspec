@@ -15,7 +15,6 @@ Gem::Specification.new do |s|
   s.homepage = "http://github.com/normelton/snmp4em"
   s.rdoc_options = ["--line-numbers", "--inline-source", "--title", "Snmp4em", "--main", "README.rdoc"]
   s.require_paths = ["lib"]
-  s.rubyforge_project = "snmp4em"
   s.rubygems_version = "1.8.16"
   s.summary = "A high-performance SNMP engine built on EventMachine and Ruby-SNMP"
   s.add_runtime_dependency 'snmp', '>= 1.0.2'
