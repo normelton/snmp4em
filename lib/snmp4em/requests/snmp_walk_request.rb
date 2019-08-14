@@ -60,19 +60,19 @@ module SNMP4EM
         return
       end
 
-      send_msg
+      send_self
     end
 
     private
     
-    def send_msg
-      Manager.track_request(self)
+    def send_self
+      @sender.track_request(self)
 
       vb_list = SNMP::VarBindList.new(pending_oids.collect{|oid| oid[:next_oid]})
       request = SNMP::GetNextRequest.new(@snmp_id, vb_list)
       message = SNMP::Message.new(@sender.version, @sender.community_ro, request)
 
-      super(message)
+      send_msg(message)
     end
   end  
 end

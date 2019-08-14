@@ -1,5 +1,11 @@
 module SNMP4EM
   class Handler < EventMachine::Connection  # @private
+    def initialize(manager)
+      super
+
+      @manager = manager
+    end
+
     def receive_data(data)
       begin
         message = SNMP::Message.decode(data)
@@ -17,7 +23,7 @@ module SNMP4EM
       # request, ignore it.
       #
 
-      if request = Manager.pending_requests[response.request_id]
+      if request = @manager.pending_requests[response.request_id]
         request.handle_response(response)
       end
     end
