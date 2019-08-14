@@ -52,12 +52,12 @@ module SNMP4EM
     
     def init_callbacks  # @private
       self.callback do
-        Manager.pending_requests.delete(@snmp_id)
+        Manager.untrack_request(@snmp_id)
       end
       
       self.errback do
         @timeout_timer.cancel
-        Manager.pending_requests.delete(@snmp_id)
+        Manager.untrack_request(@snmp_id)
       end
     end
 
