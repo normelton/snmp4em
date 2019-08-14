@@ -67,14 +67,10 @@ module SNMP4EM
         request.snmp_id = @next_index
       end while @pending_requests[request.snmp_id]
 
-      warn "TRACK: #{request.snmp_id}"
-      warn "Number of pending requests: #{@pending_requests.size}"
-
       @pending_requests[request.snmp_id] = request
     end
 
     def untrack_request(snmp_id)
-      warn "UNTRACK#{snmp_id}"
       @pending_requests.delete(snmp_id)
     end
     
