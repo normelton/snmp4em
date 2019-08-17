@@ -33,7 +33,7 @@ module SNMP4EM
 
       # Assigns an SNMP ID to an outgoing request so that it can be matched with its incoming response
       def track_request(request)
-        @pending_requests.delete(request.snmp_id)
+        untrack_request(request.snmp_id)
 
         begin
           @next_index = (@next_index + 1) % MAX_INDEX
@@ -41,6 +41,10 @@ module SNMP4EM
         end while @pending_requests[request.snmp_id]
 
         @pending_requests[request.snmp_id] = request
+      end
+
+      def untrack_request(snmp_id)
+        @pending_requests.delete(snmp_id)
       end
     end
     
@@ -74,6 +78,9 @@ module SNMP4EM
     
     def send_msg(message) # @private
       self.class.socket.send_datagram message.encode, @host, @port
+    rescue EventMachine::ConnectionError
+      self.class.untrack_request message.pdu.request_id
+      raise
     end
 
     def wrap_in_fiber(request) # @private
