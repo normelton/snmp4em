@@ -229,7 +229,7 @@ For example:
 
 Version 1.1.5:
 
-* Fix memory leak (#10), many thanks to @paddor
+* Fix memory leak (#10), many thanks to paddor
 
 Version 1.1.5:
 
