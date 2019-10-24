@@ -13,41 +13,9 @@ module SNMP4EM
     #
     # @pending_requests maps a request's id to its SnmpRequest
     #
-    @pending_requests = {}
-    @socket = nil
     
-    class << self
-      attr_reader :pending_requests
-      attr_reader :socket
-      
-      # Initializes the outgoing socket. Checks to see if it's in an error state, and if so closes and reopens the socket
-      def init_socket
-        if !@socket.nil? && @socket.error?
-          @socket.close_connection
-          @socket = nil
-        end
-
-        @next_index ||= rand(MAX_INDEX)
-        @socket ||= EM::open_datagram_socket("0.0.0.0", 0, Handler)
-      end
-
-      # Assigns an SNMP ID to an outgoing request so that it can be matched with its incoming response
-      def track_request(request)
-        untrack_request(request.snmp_id)
-
-        begin
-          @next_index = (@next_index + 1) % MAX_INDEX
-          request.snmp_id = @next_index
-        end while @pending_requests[request.snmp_id]
-
-        @pending_requests[request.snmp_id] = request
-      end
-
-      def untrack_request(snmp_id)
-        @pending_requests.delete(snmp_id)
-      end
-    end
-    
+    attr_reader :pending_requests
+    attr_reader :socket
     attr_reader :host, :port, :timeout, :retries, :version, :community_ro, :community_rw
     
     # Creates a new object to communicate with SNMP agents. Optionally pass in the following parameters:
@@ -72,14 +40,44 @@ module SNMP4EM
 
       @community_ro = args[:community_ro] || args[:community] || "public"
       @community_rw = args[:community_rw] || args[:community] || "public"
+
+      @pending_requests = {}
+      @socket = nil
       
-      self.class.init_socket
+      init_socket
+    end
+    
+    # Initializes the outgoing socket. Checks to see if it's in an error state, and if so closes and reopens the socket
+    def init_socket
+      if !@socket.nil? && @socket.error?
+        @socket.close_connection
+        @socket = nil
+      end
+
+      @next_index ||= rand(MAX_INDEX)
+      @socket ||= EM::open_datagram_socket("0.0.0.0", 0, Handler, self)
+    end
+
+    # Assigns an SNMP ID to an outgoing request so that it can be matched with its incoming response
+    def track_request(request)
+      untrack_request(request.snmp_id)
+
+      begin
+        @next_index = (@next_index + 1) % MAX_INDEX
+        request.snmp_id = @next_index
+      end while @pending_requests[request.snmp_id]
+
+      @pending_requests[request.snmp_id] = request
+    end
+
+    def untrack_request(snmp_id)
+      @pending_requests.delete(snmp_id)
     end
     
     def send_msg(message) # @private
-      self.class.socket.send_datagram message.encode, @host, @port
+      socket.send_datagram message.encode, @host, @port
     rescue EventMachine::ConnectionError
-      self.class.untrack_request message.pdu.request_id
+      untrack_request message.pdu.request_id
       raise
     end
 

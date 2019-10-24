@@ -42,13 +42,13 @@ module SNMP4EM
         return
       end
     
-      send_msg
+      send_self
     end
 
     private
 
-    def send_msg
-      Manager.track_request(self)
+    def send_self
+      @sender.track_request(self)
 
       query_oids = @oids.select{|oid| oid[:state] == :pending}.collect{|oid| oid[:requested_oid]}
 
@@ -56,7 +56,7 @@ module SNMP4EM
       request = SNMP::GetRequest.new(@snmp_id, vb_list)
       message = SNMP::Message.new(@sender.version, @sender.community_ro, request)
 
-      super(message)
+      send_msg(message)
     end
   end  
 end
